@@ -9,17 +9,17 @@ export default function Header() {
   const nav = useNavigate();
   const { pathname } = useLocation();
 
-  // колокольчик нужен только НЕ модератору
-  const showBell = !pathname.startsWith('/moderator');
+  /* колокольчик показываем ➜ только у студентов */
+  const isStaff = pathname.startsWith('/moderator') || pathname.startsWith('/teacher');
   const { unreadCount = 0 } = useNotifications() || {};
+  const showBell = !isStaff;
+
+  /* куда ведёт клик по логотипу */
+  const home = isStaff ? (pathname.startsWith('/moderator') ? '/moderator/participants' : '/teacher/review') : '/courses';
 
   return (
     <header className={styles.bar}>
-      {/* логотип → /courses (или /moderator/participants если уже там) */}
-      <h1
-        className={styles.logo}
-        onClick={() => nav(pathname.startsWith('/moderator') ? '/moderator/participants' : '/courses')}
-      >
+      <h1 className={styles.logo} onClick={() => nav(home)}>
         Neuroteach
       </h1>
 
@@ -31,7 +31,6 @@ export default function Header() {
           </div>
         )}
 
-        {/* аватар + выпадающее меню */}
         <div className={styles.profile} onClick={() => setOpen((o) => !o)}>
           <span className={styles.avatar}>N</span>
           <span className={styles.caret} />
