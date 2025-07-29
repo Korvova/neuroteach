@@ -1,0 +1,3 @@
+.wrap { max-width: 800px; margin: 0 auto; padding: 32px 16px 64px; }
+h2   { margin-bottom: 20px; font-size: 1.4rem; font-weight: 600; }
+.link { background:none; border:none; color:var(--accent); cursor:pointer; text-align:left; }

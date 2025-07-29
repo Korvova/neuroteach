@@ -1,0 +1,12 @@
+.tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: .8rem;
+  color: #fff;
+}
+.yellow { background: #fbbc04; }
+.green  { background: #34a853; }
+.blue   { background: #4285f4; }
+.purple { background: #a142f4; }
+.red    { background: #ea4335; }

@@ -1,0 +1,6 @@
+.wrap { max-width: 800px; margin: 0 auto; padding: 32px 16px 64px; display:flex; flex-direction:column; gap:20px; }
+.back { background:none; border:none; color:var(--accent); cursor:pointer; align-self:flex-start; }
+.desc { white-space:pre-wrap; line-height:1.55; }
+.h { margin:0; font-size:1.1rem; font-weight:600; }
+.ta { width:100%; resize:vertical; }
+.primary { padding:10px 20px; border:none; border-radius:8px; background:var(--accent); color:#fff; font-weight:600; cursor:pointer; margin-top:8px; }

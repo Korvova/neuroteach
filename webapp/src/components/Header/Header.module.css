@@ -1,0 +1,27 @@
+.bar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+}
+
+.logo { font-size: 1.2rem; font-weight: 600; cursor: pointer; }
+
+.profile { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+
+.avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: flex; justify-content: center; align-items: center;
+  font-weight: 600;
+}
+
+.caret {
+  width: 0; height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #333;
+}
