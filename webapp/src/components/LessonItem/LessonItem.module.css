@@ -1,0 +1,17 @@
+.item {
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  transition: background .18s ease, transform .18s ease;
+  user-select: none;
+}
+.item:hover   { background: #f6f6f6; transform: translateY(-1px); }
+.item:active  { transform: translateY(0); }
+
+.locked {
+  background: #f0f0f0;
+  color: #777;
+}
+.locked:hover { background: #f0f0f0; transform: none; }
