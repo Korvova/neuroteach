@@ -8,7 +8,7 @@ import AppLayout from './layout/AppLayout.jsx';
 
 import TasksPage from './pages/TasksPage/TasksPage.jsx';
 import TaskDetailPage from './pages/TaskDetailPage/TaskDetailPage.jsx';
-
+import NotificationsPage from './pages/NotificationsPage/NotificationsPage.jsx';
 
 
 
@@ -30,12 +30,11 @@ export default function App() {
         <Route path="/profile/completed" element={<CompletedLessonsPage />} />
         
 
-+  <Route path="/profile/tasks" element={<TasksPage />} />
-+  <Route path="/profile/tasks/:taskId" element={<TaskDetailPage />} />
+  <Route path="/profile/tasks" element={<TasksPage />} />
+  <Route path="/profile/tasks/:taskId" element={<TaskDetailPage />} />
 
+ <Route path="/profile/notifications" element={<NotificationsPage />} />
 
-
-        <Route path="/profile/notifications" element={<div>TODO: NotificationsPage</div>} />
       </Route>
 
       <Route path="/forgot" element={<div>TODO: ForgotPasswordPage</div>} />
