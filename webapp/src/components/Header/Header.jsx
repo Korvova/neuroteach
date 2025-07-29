@@ -1,28 +1,37 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ProfileMenu from '../ProfileMenu/ProfileMenu';
 import { useNotifications } from '../../context/NotificationsContext';
 import styles from './Header.module.css';
 
 export default function Header() {
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
-  const { unreadCount } = useNotifications();
+  const nav = useNavigate();
+  const { pathname } = useLocation();
+
+  // колокольчик нужен только НЕ модератору
+  const showBell = !pathname.startsWith('/moderator');
+  const { unreadCount = 0 } = useNotifications() || {};
 
   return (
     <header className={styles.bar}>
-      <h1 className={styles.logo} onClick={() => navigate('/courses')}>
+      {/* логотип → /courses (или /moderator/participants если уже там) */}
+      <h1
+        className={styles.logo}
+        onClick={() => nav(pathname.startsWith('/moderator') ? '/moderator/participants' : '/courses')}
+      >
         Neuroteach
       </h1>
 
       <div className={styles.actions}>
-        {/* колокольчик */}
-        <div className={styles.bell} onClick={() => navigate('/profile/notifications')}>
-          🛎
-          {unreadCount > 0 && <span className={styles.badge}>{unreadCount}</span>}
-        </div>
+        {showBell && (
+          <div className={styles.bell} onClick={() => nav('/profile/notifications')}>
+            🛎
+            {unreadCount > 0 && <span className={styles.badge}>{unreadCount}</span>}
+          </div>
+        )}
 
-        {/* профиль */}
+        {/* аватар + выпадающее меню */}
         <div className={styles.profile} onClick={() => setOpen((o) => !o)}>
           <span className={styles.avatar}>N</span>
           <span className={styles.caret} />

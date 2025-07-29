@@ -1,14 +1,23 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './ProfileMenu.module.css';
 
 export default function ProfileMenu({ open, close }) {
-  const navigate = useNavigate();
+  const nav = useNavigate();
+  const { pathname } = useLocation();
   if (!open) return null;
 
-  const go = (path) => {
-    navigate(path);
+  const go = (p) => {
+    nav(p);
     close();
   };
+
+  // для модератора только «Выйти»
+  if (pathname.startsWith('/moderator'))
+    return (
+      <ul className={styles.menu} onClick={(e) => e.stopPropagation()}>
+        <li className={styles.sep} onClick={() => go('/')}>Выйти</li>
+      </ul>
+    );
 
   return (
     <ul className={styles.menu} onClick={(e) => e.stopPropagation()}>

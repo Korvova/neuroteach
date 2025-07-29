@@ -29,3 +29,12 @@
   text-decoration: underline;
   padding: 6px 0;
 }
+
+
+
+.secondary {
+  background: #fff;
+  border: 1px solid var(--border);
+  color: var(--accent);
+}
+.secondary:hover { background: #f5f5f5; }
