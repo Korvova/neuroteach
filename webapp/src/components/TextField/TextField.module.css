@@ -1,0 +1,18 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 18px;
+}
+
+input {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color .18s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
