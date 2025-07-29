@@ -78,6 +78,23 @@ export default function CreatorCoursesPage() {
 
             <div style={{ display: 'flex', gap: 12, marginTop: 6 }}>
               <Button onClick={save}>Сохранить</Button>
+
+
+ {isEdit && (
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    if (confirm('Удалить курс?')) {
+                      deleteCourse(modalData.id);
+                      setModalData(null);
+                    }
+                  }}
+                >
+                  Удалить
+                </Button>
+              )}
+
+
               <Button variant="secondary" onClick={() => setModalData(null)}>
                 Отмена
               </Button>
