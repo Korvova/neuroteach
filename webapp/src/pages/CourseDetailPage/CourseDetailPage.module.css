@@ -1,31 +1,28 @@
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 32px 16px 64px;
-}
 
-.title {
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin-bottom: 18px;
-  letter-spacing: -0.02em;
-}
+.container { max-width: 800px; margin: 0 auto; padding: 32px 16px 64px; }
+.title     { font-size: 1.8rem; font-weight: 600; margin-bottom: 6px; }
+.progress  { margin: 2px 0 18px; font-weight: 500; color: #555; }
+.desc      { margin-bottom: 28px; line-height: 1.55; }
+.subtitle  { font-size: 1.2rem; font-weight: 600; margin-bottom: 16px; }
+.list      { display: flex; flex-direction: column; gap: 12px; list-style: none; padding: 0; }
 
-.desc {
-  margin-bottom: 28px;
-  line-height: 1.55;
-}
+/* уже существующие классы container / title / desc / subtitle / list */
 
-.subtitle {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 16px;
-}
 
-.list {
+.legend {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 12px;
-  list-style: none;
-  padding: 0;
+  margin-bottom: 20px;
 }
+
+.dotWrap { display: flex; align-items: center; gap: 6px; font-size: .9rem; }
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+
+
