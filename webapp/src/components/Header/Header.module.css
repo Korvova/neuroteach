@@ -8,8 +8,20 @@
 
 .logo { font-size: 1.2rem; font-weight: 600; cursor: pointer; }
 
-.profile { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+.actions { display: flex; align-items: center; gap: 20px; }
 
+.bell { position: relative; font-size: 1.3rem; cursor: pointer; user-select: none; }
+.badge {
+  position: absolute; top: -6px; right: -10px;
+  min-width: 18px; height: 18px;
+  background: #ff3b30; color: #fff;
+  border-radius: 50%;
+  font-size: .7rem; font-weight: 600;
+  display: flex; justify-content: center; align-items: center;
+  padding: 0 4px;
+}
+
+.profile { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
 .avatar {
   width: 32px; height: 32px;
   border-radius: 50%;
@@ -18,7 +30,6 @@
   display: flex; justify-content: center; align-items: center;
   font-weight: 600;
 }
-
 .caret {
   width: 0; height: 0;
   border-left: 5px solid transparent;
