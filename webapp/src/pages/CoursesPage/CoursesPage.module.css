@@ -1,0 +1,22 @@
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 16px 64px;
+}
+
+.heading {
+  font-size: 1.7rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  gap: 20px;
+}
+
+/* ≥600px — две колонки; ≥900px — три */
+@media (min-width: 600px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 900px) { .grid { grid-template-columns: repeat(3, 1fr); } }

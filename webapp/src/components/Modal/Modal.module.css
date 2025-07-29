@@ -1,0 +1,29 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.card {
+  width: min(90%, 380px);
+  padding: 32px 28px;
+  border-radius: 14px;
+  background: #fff;
+  text-align: center;
+  box-shadow: 0 12px 32px rgba(0,0,0,.12);
+}
+
+.btn {
+  margin-top: 20px;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
