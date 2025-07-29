@@ -32,6 +32,14 @@
 
 
 
+.success {
+  background: #34a853;          /* Google green */
+  color: #fff;
+}
+.success:hover { background: #2c8b45; }
+
+
+
 .secondary {
   background: #fff;
   border: 1px solid var(--border);
