@@ -6,7 +6,7 @@ export function uploadFile(lessonId, file) {
   fd.append('lessonId', lessonId);
 
 
-  return api.post('/upload', fd)   // boundary проставит axios
+  return api.post('/api/upload', fd)   // boundary проставит axios
            .then(r => r.data);
 
 

@@ -5,7 +5,7 @@ import { api, authHeader } from './api';
  * GET /courses          → [{id,title,price}, …]
  */
 export async function getCourses() {
-  const { data } = await api.get('/courses', authHeader());
+  const { data } = await api.get('/api/courses', authHeader());
   return data;
 }
 
@@ -14,6 +14,6 @@ export async function getCourses() {
  * GET /courses/:id      → {id,title,description,lessons:[…]}
  */
 export async function getCourse(id) {
-  const { data } = await api.get(`/courses/${id}`, authHeader());
+  const { data } = await api.get(`/api/courses/${id}`, authHeader());
   return data;
 }
