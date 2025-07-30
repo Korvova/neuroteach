@@ -1,14 +1,21 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './ProfileMenu.module.css';
+import { logout } from '../../Services/auth';
 
 export default function ProfileMenu({ open, close }) {
   const nav = useNavigate();
   const { pathname } = useLocation();
   if (!open) return null;
 
-  const go = (p) => { nav(p); close(); };
+  const go = (p) => {
+    nav(p);
+    close();
+  };
 
-  const isStaff = pathname.startsWith('/moderator') || pathname.startsWith('/teacher');
+  const isStaff =
+    pathname.startsWith('/moderator') ||
+    pathname.startsWith('/teacher') ||
+    pathname.startsWith('/creator');
 
   return (
     <ul className={styles.menu} onClick={(e) => e.stopPropagation()}>
@@ -19,7 +26,10 @@ export default function ProfileMenu({ open, close }) {
           <li onClick={() => go('/profile/notifications')}>Уведомления</li>
         </>
       )}
-      <li className={styles.sep} onClick={() => go('/')}>Выйти</li>
+
+<li className={styles.sep} onClick={() => { logout(); go('/'); }}>Выйти</li>
+
+
     </ul>
   );
 }

@@ -9,25 +9,41 @@ export default function Header() {
   const nav = useNavigate();
   const { pathname } = useLocation();
 
-  /* колокольчик показываем ➜ только у студентов */
-  const isStaff = pathname.startsWith('/moderator') || pathname.startsWith('/teacher');
+  /* staff‑роли: модератор, учитель, создатель */
+  const isStaff =
+    pathname.startsWith('/moderator') ||
+    pathname.startsWith('/teacher') ||
+    pathname.startsWith('/creator');
+
+  /* колокольчик только у студентов */
   const { unreadCount = 0 } = useNotifications() || {};
   const showBell = !isStaff;
 
-  /* куда ведёт клик по логотипу */
-  const home = isStaff ? (pathname.startsWith('/moderator') ? '/moderator/participants' : '/teacher/review') : '/courses';
+  /* переход по логотипу */
+  const home = pathname.startsWith('/moderator')
+    ? '/moderator/participants'
+    : pathname.startsWith('/teacher')
+    ? '/teacher/review'
+    : pathname.startsWith('/creator')
+    ? '/creator/courses'
+    : '/courses';
 
   return (
     <header className={styles.bar}>
       <h1 className={styles.logo} onClick={() => nav(home)}>
-        Neuroteach
+        Neuroteach 
       </h1>
 
       <div className={styles.actions}>
         {showBell && (
-          <div className={styles.bell} onClick={() => nav('/profile/notifications')}>
+          <div
+            className={styles.bell}
+            onClick={() => nav('/profile/notifications')}
+          >
             🛎
-            {unreadCount > 0 && <span className={styles.badge}>{unreadCount}</span>}
+            {unreadCount > 0 && (
+              <span className={styles.badge}>{unreadCount}</span>
+            )}
           </div>
         )}
 

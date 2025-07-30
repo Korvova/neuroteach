@@ -1,6 +1,8 @@
-/**************************************************************
-  Datasource & generator
-**************************************************************/
+/**
+ * ************************************************************
+ * Datasource & generator
+ * ************************************************************
+ */
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -10,9 +12,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
-/**************************************************************
-  ENUMS
-**************************************************************/
+/**
+ * ************************************************************
+ * ENUMS
+ * ************************************************************
+ */
 enum Role {
   STUDENT
   MODERATOR
@@ -20,22 +24,22 @@ enum Role {
   CREATOR
 }
 
-enum LessonCheckType {   // способ проверки урока
-  VIEW       // просто «далее»
-  FILE       // файл‑задание
-  TEST       // связанный тест
+enum LessonCheckType {
+  VIEW // просто «далее»
+  FILE // файл‑задание
+  TEST // связанный тест
 }
 
-enum LessonStatus {      // прогресс студента по уроку
+enum LessonStatus {
   NOT_STARTED
   IN_PROGRESS
   ON_REVIEW
-  NEED_CLARIFY      // студент задал вопрос
-  NEED_REWORK       // учитель вернул на доработку
+  NEED_CLARIFY // студент задал вопрос
+  NEED_REWORK // учитель вернул на доработку
   COMPLETED
 }
 
-enum TaskStatus {        // статус «Задания» в профиле
+enum TaskStatus {
   WAIT
   READY
   NEED_CLARIFY
@@ -49,12 +53,14 @@ enum PaymentStatus {
   CANCELED
 }
 
-/**************************************************************
-  USERS, GROUPS
-**************************************************************/
+/**
+ * ************************************************************
+ * USERS, GROUPS
+ * ************************************************************
+ */
 model User {
-  id        BigInt   @id @default(autoincrement())
-  email     String   @unique
+  id        BigInt @id @default(autoincrement())
+  email     String @unique
   password  String
   firstName String
   lastName  String
@@ -67,107 +73,118 @@ model User {
   notifications Notification[]
   payments      Payment[]        @relation("Buyer")
 
-/* 🔹 учитель проверяет файлы */
-  teacherChecks FileSubmission[] @relation("TeacherCheck")
+  fileUploads FileSubmission[] @relation("StudentFiles")
 
+  /**
+   * 🔹 учитель проверяет файлы
+   */
+  teacherChecks FileSubmission[] @relation("TeacherCheck")
 
   createdAt DateTime @default(now())
 }
 
-/* связь многие‑ко‑многим User–Group + доп.поле (certificate) */
+/**
+ * связь многие‑ко‑многим User–Group + доп.поле (certificate)
+ */
 model Group {
-  id        BigInt   @id @default(autoincrement())
-  name      String
-  members   Membership[]
+  id      BigInt       @id @default(autoincrement())
+  name    String
+  members Membership[]
   // lessons   Lesson[]  // если будут групповые ограничения
 
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
 }
 
 model Membership {
-  userId   BigInt
-  groupId  BigInt
+  userId      BigInt
+  groupId     BigInt
   // необязательный сертификат, загружаемый модератором
-  certificate String?   
+  certificate String?
 
-  user  User  @relation(fields: [userId],  references: [id])
+  user  User  @relation(fields: [userId], references: [id])
   group Group @relation(fields: [groupId], references: [id])
 
   @@id([userId, groupId])
 }
 
-/**************************************************************
-  КУРСЫ  →  УРОКИ  →  ТЕСТЫ
-**************************************************************/
+/**
+ * ************************************************************
+ * КУРСЫ  →  УРОКИ  →  ТЕСТЫ
+ * ************************************************************
+ */
 model Course {
-  id        BigInt   @id @default(autoincrement())
-  title     String
+  id          BigInt   @id @default(autoincrement())
+  title       String   @unique
   // DraftJS raw‑JSON или Markdown → TEXT
-  description  Json
-  price     Int?       // ₽, nullable = бесплатный
-  lessons   Lesson[]
+  description Json
+  price       Int? // ₽, nullable = бесплатный
+  lessons     Lesson[]
 
   createdAt DateTime @default(now())
 }
 
 model Lesson {
-  id        BigInt   @id @default(autoincrement())
+  id        BigInt          @id @default(autoincrement())
   courseId  BigInt
-  order     Int       // номер в курсе
+  order     Int // номер в курсе
   title     String
-  content   Json      // raw‑JSON
+  content   Json // raw‑JSON
   checkType LessonCheckType
-  testId    BigInt?   // если checkType = TEST
+  testId    BigInt? // если checkType = TEST
+
+  submissions FileSubmission[] @relation("LessonFiles") // 🔹
 
   // relations
-  course  Course @relation(fields: [courseId], references: [id])
-  test    Test?  @relation(fields: [testId],   references: [id])
+  course     Course           @relation(fields: [courseId], references: [id])
+  test       Test?            @relation(fields: [testId], references: [id])
   progresses LessonProgress[]
 
   createdAt DateTime @default(now())
 
-  @@unique([courseId, order])     // один номер в рамках курса
+  @@unique([courseId, order]) // один номер в рамках курса
 }
 
 model Test {
-  id        BigInt   @id @default(autoincrement())
+  id        BigInt     @id @default(autoincrement())
   title     String
   questions Question[]
-  lesson    Lesson[]     // обратная связь
+  lesson    Lesson[] // обратная связь
 
   createdAt DateTime @default(now())
 }
 
 model Question {
-  id      BigInt   @id @default(autoincrement())
-  testId  BigInt
-  text    String
-  type    String   // 'one' | 'many'  (можно Enum, если нужно)
+  id     BigInt @id @default(autoincrement())
+  testId BigInt
+  text   String
+  type   String // 'one' | 'many'  (можно Enum, если нужно)
 
   answers Answer[]
-  test    Test  @relation(fields: [testId], references: [id])
+  test    Test     @relation(fields: [testId], references: [id])
 }
 
 model Answer {
-  id          BigInt   @id @default(autoincrement())
-  questionId  BigInt
-  text        String
-  correct     Boolean  @default(false)
+  id         BigInt  @id @default(autoincrement())
+  questionId BigInt
+  text       String
+  correct    Boolean @default(false)
 
   question Question @relation(fields: [questionId], references: [id])
 }
 
-/**************************************************************
-  ПРОГРЕСС, ЗАДАНИЯ, ФАЙЛ‑САБМИШНЫ
-**************************************************************/
+/**
+ * ************************************************************
+ * ПРОГРЕСС, ЗАДАНИЯ, ФАЙЛ‑САБМИШНЫ
+ * ************************************************************
+ */
 model LessonProgress {
-  userId    BigInt
-  lessonId  BigInt
-  status    LessonStatus @default(NOT_STARTED)
+  userId   BigInt
+  lessonId BigInt
+  status   LessonStatus @default(NOT_STARTED)
   // сохранённые ответы теста / комментарии и т.п.
-  meta      Json?
+  meta     Json?
 
-  user   User   @relation(fields: [userId],   references: [id])
+  user   User   @relation(fields: [userId], references: [id])
   lesson Lesson @relation(fields: [lessonId], references: [id])
 
   updatedAt DateTime @updatedAt
@@ -177,54 +194,68 @@ model LessonProgress {
 }
 
 model Task {
-  id        BigInt  @id @default(autoincrement())
-  userId    BigInt
-  title     String
-  status    TaskStatus @default(WAIT)
+  id          BigInt           @id @default(autoincrement())
+  userId      BigInt
+  title       String
+  status      TaskStatus       @default(WAIT)
   description Json?
-  files     FileSubmission[]
+  files       FileSubmission[]
 
-  user      User @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 }
 
 model FileSubmission {
-  id        BigInt @id @default(autoincrement())
-  taskId    BigInt
-  filePath  String      // ссылка на S3 / disk
+  id BigInt @id @default(autoincrement())
+
+  /**
+   * 🔹 новое: к какому уроку / пользователю относится
+   */
+  lessonId  BigInt
+  studentId BigInt
+
+  taskId    BigInt?
+  filePath  String
   comment   String?
-  teacherId BigInt?     // кто проверял
+  teacherId BigInt?
 
-  task    Task @relation(fields: [taskId], references: [id])
+  lesson  Lesson @relation("LessonFiles", fields: [lessonId], references: [id])
+  student User   @relation("StudentFiles", fields: [studentId], references: [id])
+
+  task    Task? @relation(fields: [taskId], references: [id])
   teacher User? @relation("TeacherCheck", fields: [teacherId], references: [id])
+
   createdAt DateTime @default(now())
 }
 
-/**************************************************************
-  УВЕДОМЛЕНИЯ
-**************************************************************/
+/**
+ * ************************************************************
+ * УВЕДОМЛЕНИЯ
+ * ************************************************************
+ */
 model Notification {
-  id       BigInt  @id @default(autoincrement())
-  userId   BigInt
-  title    String
-  body     String
-  read     Boolean @default(false)
+  id     BigInt  @id @default(autoincrement())
+  userId BigInt
+  title  String
+  body   String
+  read   Boolean @default(false)
 
-  user     User @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 }
 
-/**************************************************************
-  ОПЛАТЫ / ДОСТУПЫ
-**************************************************************/
+/**
+ * ************************************************************
+ * ОПЛАТЫ / ДОСТУПЫ
+ * ************************************************************
+ */
 model Payment {
-  id        BigInt   @id @default(autoincrement())
-  buyerId   BigInt   // Moderator (организация)
-  quantity  Int
-  amount    Int      // ₽
-  status    PaymentStatus @default(PENDING)
+  id       BigInt        @id @default(autoincrement())
+  buyerId  BigInt // Moderator (организация)
+  quantity Int
+  amount   Int // ₽
+  status   PaymentStatus @default(PENDING)
 
-  buyer     User @relation("Buyer", fields: [buyerId], references: [id])
+  buyer     User     @relation("Buyer", fields: [buyerId], references: [id])
   createdAt DateTime @default(now())
 }
-

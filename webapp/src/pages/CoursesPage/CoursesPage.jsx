@@ -1,43 +1,40 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CourseTile from '../../components/CourseTile/CourseTile';
 import Modal from '../../components/Modal/Modal';
+import { getCourses } from '../../Services/courses';
 import styles from './CoursesPage.module.css';
 
-const list = [
-  { id: 'intro',   title: 'Вход в нейросети',         lessons: 10, disabled: false },
-  { id: 'mkt',     title: 'Маркетинг и нейросети',    lessons: 10, disabled: true  },
-  { id: 'msa',     title: 'Микросерверная архитектура', lessons: 8, disabled: true  },
-  { id: 'tg',      title: 'Телеграм‑боты и Web App',  lessons: 8,  disabled: true  },
-];
-
 export default function CoursesPage() {
+  const [courses, setCourses] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleTileClick = (course) => {
-    if (course.disabled) {
-      setModalOpen(true);
-    } else {
-      navigate(`/courses/${course.id}`);
-    }
+  useEffect(() => {
+    getCourses().then(setCourses);
+  }, []);
+
+  const handleTileClick = (c) => {
+    // правило: только курс id = 1 открыт, остальные серые
+    if (c.id !== 1) return setModalOpen(true);
+    navigate(`/courses/${c.id}`);
   };
 
   return (
     <div className={styles.container}>
       <h2 className={styles.heading}>Доступные курсы</h2>
 
-      <div className={styles.grid}>
-        {list.map((c) => (
-          <CourseTile
-            key={c.id}
-            title={c.title}
-            lessons={c.lessons}
-            disabled={c.disabled}
-            onClick={() => handleTileClick(c)}
-          />
-        ))}
-      </div>
+ <div className={styles.grid}>
+  {courses.map((c) => (
+    <CourseTile
+      key={c.id}
+      title={c.title}
+      lessons={c.price ?? 0}   // Если позже добавите lessons.length — замените здесь
+      disabled={c.id !== 1}
+      onClick={() => handleTileClick(c)}
+    />
+  ))}
+</div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <p>Доступ к курсу закрыт.</p>

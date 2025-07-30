@@ -1,163 +1,184 @@
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import styles from './LessonPage.module.css';
 
-/* демо‑данные */
-const lessons = {
-  view: {
-    title: 'Введение (просмотр)',
-    type: 'view',
-    content: (
-      <>
-        <h4>Текстовый урок</h4>
-        <p>Короткое описание того, как работают языковые модели…</p>
-      </>
-    ),
-  },
-  file: {
-    title: 'Введение (файл)',
-    type: 'file',
-    content: (
-      <>
-        <p>Скачайте методичку, выполните задание, затем загрузите готовый PDF.</p>
-        <a href="#" download>Скачать задание</a>
-      </>
-    ),
-  },
-  test: {
-    title: 'Введение (тест)',
-    type: 'test',
-    content: <p>Ответьте на вопросы, выбрав один вариант из четырёх.</p>,
-    questions: [
-      {
-        id: 1,
-        text: 'Чат‑GPT относится к классу…',
-        answers: [
-          'дискриминативных моделей',
-          'генеративных языковых моделей',
-          'сверточных сетей',
-          'байесовских классификаторов',
-        ],
-        correct: 1,           // индекс правильного
-      },
-    ],
-  },
-};
+import { getLesson }      from '../../Services/lessons';
+import { saveTestResult } from '../../Services/progress';
+import { uploadFile }     from '../../Services/upload';
+
+import Modal   from '../../components/Modal/Modal';
+import styles  from './LessonPage.module.css';
 
 export default function LessonPage() {
   const { lessonId } = useParams();
-  const navigate = useNavigate();
-  const [file, setFile] = useState(null);
-  const [chosen, setChosen] = useState({});
-  const [questionIdx, setQuestionIdx] = useState(0);
-  const [showModal, setShowModal] = useState(false);
+  const navigate     = useNavigate();
 
-  const lesson = lessons[lessonId] || { title: 'Урок', type: 'view', content: null };
+  const [lesson, setLesson]   = useState(null);
+  const [file,   setFile]     = useState(null);
+  const [chosen, setChosen]   = useState({});
+  const [idx,    setIdx]      = useState(0);
 
-  const handleNext = () => navigate(-1);        // вернёмся к списку уроков (заглушка)
-  const handleFileSend = () => alert('Файл отправлен!');
-  const handleTestNext = () => {
-    if (questionIdx < lesson.questions.length - 1) {
-      setQuestionIdx((i) => i + 1);
-    } else {
-      alert('Тест завершён 🎉');
-      handleNext();
-    }
+  // ▼ статус урока (из БД или локально после действий)
+  const [status, setStatus]   = useState(null);   // 'ON_REVIEW' | 'COMPLETED' | …
+  const [sent,   setSent]     = useState(false);  // для кнопки FILE
+
+  const [result, setResult]   = useState(null);   // {score,total,passed}
+
+  /* ───────── первичная загрузка ───────── */
+  useEffect(() => {
+    getLesson(lessonId).then((l) => {
+      setLesson(l);
+      setStatus(l.progresses?.[0]?.status ?? null);     // если бек уже отдаёт
+    });
+  }, [lessonId]);
+
+  if (!lesson) return null;
+
+  const handleNext = () => navigate(-1);
+
+  /* ---------- маленькая плашка‑статус ---------- */
+  const StatusBadge = () => {
+    const map = {
+      ON_REVIEW:    'Отправлено — ждёт проверки',
+      NEED_CLARIFY: 'Нужны уточнения',
+      NEED_REWORK:  'Вернули на доработку',
+      COMPLETED:    'Готово',
+    };
+    if (!status || status === 'NOT_STARTED') return null;
+    return (
+      <span className={`${styles.badge} ${styles[status]}`}>
+        {map[status]}
+      </span>
+    );
   };
 
-  const q = lesson.questions?.[questionIdx];
+  /* ---------- FILE‑урок: загрузка ---------- */
+  if (lesson.checkType === 'FILE') {
+    return (
+      <div className={styles.container}>
+        <StatusBadge />
+        <h2 className={styles.title}>{lesson.title}</h2>
+        <p>Скачайте задание, выполните и прикрепите файл.</p>
 
-  return (
-    <div className={styles.container}>
-      <h2 className={styles.title}>{lesson.title}</h2>
-
-      <div className={styles.content}>{lesson.content}</div>
-
-      {/* динамическая нижняя часть */}
-      {lesson.type === 'view' && (
-        <button className={styles.primary} onClick={handleNext}>
-          Далее
-        </button>
-      )}
-
-      {lesson.type === 'file' && (
         <div className={styles.fileBlock}>
-          <input
-            id="file"
-            type="file"
-            onChange={(e) => setFile(e.target.files[0])}
-          />
+          <input type="file" onChange={(e) => setFile(e.target.files[0])} />
           <button
             className={styles.primary}
             disabled={!file}
-            onClick={handleFileSend}
+            onClick={async () => {
+              try {
+
+await uploadFile(lesson.id, file);
+setSent(true);
+setStatus('ON_REVIEW');
+/* чтобы при возврате на список уже был актуальный статус */
+setLesson({ ...lesson, progress:{ status:'ON_REVIEW' } });
+
+
+
+
+              } catch {
+                alert('Не удалось загрузить файл');
+              }
+            }}
           >
-            Отправить
+            {sent ? 'Отправлено ✔' : 'Отправить'}
           </button>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {lesson.type === 'test' && (
-        <div className={styles.testBlock}>
-          <p className={styles.counter}>
-            {questionIdx + 1}/{lesson.questions.length}
-          </p>
-          <p className={styles.qtext}>{q.text}</p>
-          <ul className={styles.answers}>
-            {q.answers.map((a, i) => (
-              <li key={i}>
-                <label className={styles.radio}>
-                  <input
-                    type="radio"
-                    name="ans"
-                    checked={chosen[questionIdx] === i}
-                    onChange={() =>
-                      setChosen({ ...chosen, [questionIdx]: i })
-                    }
-                  />
-                  {a}
-                </label>
-              </li>
-            ))}
-          </ul>
-          <button
-            className={styles.primary}
-            disabled={chosen[questionIdx] == null}
-            onClick={handleTestNext}
-          >
-            {questionIdx < lesson.questions.length - 1 ? 'Далее' : 'Отправить'}
-          </button>
+  /* ---------- VIEW‑урок ---------- */
+  if (lesson.checkType === 'VIEW') {
+    return (
+      <div className={styles.container}>
+        <StatusBadge />
+        <h2 className={styles.title}>{lesson.title}</h2>
+
+        <div className={styles.content}>
+          {lesson.content?.blocks?.map((b, i) => <p key={i}>{b.text}</p>)}
         </div>
-      )}
 
-      {/* уточняющий вопрос */}
-      <button className={styles.link} onClick={() => setShowModal(true)}>
-        Задать уточняющий вопрос
-      </button>
+        <button className={styles.primary} onClick={handleNext}>Далее</button>
+      </div>
+    );
+  }
 
-      {showModal && (
-        <div className={styles.modalBackdrop} onClick={() => setShowModal(false)}>
-          <div
-            className={styles.modal}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <textarea
-              placeholder="Ваш вопрос"
-              rows="4"
-              className={styles.textarea}
-            />
-            <input type="file" style={{ margin: '12px 0' }} />
-            <div className={styles.mActions}>
-              <button className={styles.primary} onClick={() => alert('Отправлено!')}>
-                Отправить
+  /* ---------- TEST‑урок ---------- */
+  if (lesson.checkType === 'TEST') {
+    const q = lesson.test.questions[idx];
+
+    const finishTest = async () => {
+      const total = lesson.test.questions.length;
+      const score = Object.entries(chosen).reduce((s, [qi, ansIdx]) => {
+        const answer = lesson.test.questions[qi].answers[ansIdx];
+        return answer.correct ? s + 1 : s;
+      }, 0);
+
+      await saveTestResult(lesson.id, score, total);      // API
+      setResult({ score, total, passed: score === total });
+      if (score === total) setStatus('COMPLETED');
+    };
+
+    return (
+      <div className={styles.container}>
+        <StatusBadge />
+        <h2 className={styles.title}>{lesson.title}</h2>
+
+        <p className={styles.counter}>
+          {idx + 1}/{lesson.test.questions.length}
+        </p>
+        <p className={styles.qtext}>{q.text}</p>
+
+        <ul className={styles.answers}>
+          {q.answers.map((a, i) => (
+            <li key={i}>
+              <label className={styles.radio}>
+                <input
+                  type="radio"
+                  name="ans"
+                  checked={chosen[idx] === i}
+                  onChange={() => setChosen({ ...chosen, [idx]: i })}
+                />
+                {a.text}
+              </label>
+            </li>
+          ))}
+        </ul>
+
+        <button
+          className={styles.primary}
+          disabled={chosen[idx] == null}
+          onClick={() =>
+            idx < lesson.test.questions.length - 1
+              ? setIdx((n) => n + 1)
+              : finishTest()
+          }
+        >
+          {idx < lesson.test.questions.length - 1 ? 'Далее' : 'Отправить'}
+        </button>
+
+        {/* итоговая модалка */}
+        {result && (
+          <Modal open onClose={() => { setResult(null); handleNext(); }}>
+            <h3>{result.passed ? 'Тест пройден 🎉' : 'Результат'}</h3>
+            <p>
+              Правильных ответов: {result.score} из {result.total}
+            </p>
+            {!result.passed && (
+              <button
+                className={styles.primary}
+                onClick={() => window.location.reload()}
+              >
+                Пройти заново
               </button>
-              <button className={styles.link} onClick={() => setShowModal(false)}>
-                Закрыть
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+            )}
+          </Modal>
+        )}
+      </div>
+    );
+  }
+
+  /* fallback */
+  return null;
 }

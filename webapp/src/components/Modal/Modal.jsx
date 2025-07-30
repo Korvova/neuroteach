@@ -9,7 +9,7 @@ export default function Modal({ open, onClose, children }) {
         onClick={(e) => e.stopPropagation()}   /* чтобы клик по карточке не закрывал */
       >
         {children}
-        <button className={styles.btn} onClick={onClose}>Ок</button>
+    {/*  <button className={styles.btn} onClick={onClose}>Ок</button> */} 
       </div>
     </div>
   );

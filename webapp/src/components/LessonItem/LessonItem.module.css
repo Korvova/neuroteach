@@ -1,17 +1,15 @@
-.item {
-  padding: 14px 18px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: #fff;
-  cursor: pointer;
-  transition: background .18s ease, transform .18s ease;
-  user-select: none;
-}
-.item:hover   { background: #f6f6f6; transform: translateY(-1px); }
-.item:active  { transform: translateY(0); }
+/* LessonItem.module.css */
+.item  { position:relative; padding:14px 18px; border:1px solid #d0d0d0;
+         border-radius:8px; cursor:pointer; user-select:none; }
+.locked { background:#f1f1f1; cursor:default; }
+.done   { background:#e8f9ed; }           /* ← заливка «пройдено» */
 
-.locked {
-  background: #f0f0f0;
-  color: #777;
-}
-.locked:hover { background: #f0f0f0; transform: none; }
+.text   { display:block; }
+
+.badge  { position:absolute; left:18px; top:-10px; padding:1px 8px;
+          border-radius:10px; font-size:11px; font-weight:500; }
+
+.ON_REVIEW   { background:#ffe7b0; color:#7a5500; }
+.NEED_CLARIFY,
+.NEED_REWORK { background:#c0d9ff; color:#003c7a; }
+.COMPLETED   { background:#b6f2c2; color:#0b5b1c; }

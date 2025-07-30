@@ -1,0 +1,4 @@
+.wrap { padding:32px 16px 64px; max-width:1000px; margin:0 auto; }
+.nav  { display:flex; gap:20px; margin-bottom:24px; }
+.nav a { text-decoration:none; color:var(--accent); font-weight:600; }
+.active { border-bottom:2px solid var(--accent); }

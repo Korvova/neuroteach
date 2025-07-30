@@ -13,14 +13,20 @@
   cursor: pointer;
 }
 
+
 .link {
-  margin-top: 24px;
   background: none;
   border: none;
   color: var(--accent);
-  text-decoration: underline;
   cursor: pointer;
+  padding: 0;
+  font-size: .95rem;
+
+  display: block;      /* ↞ перенос на новую строку */
+  margin-top: 12px;    /* небольшой отступ сверху */
 }
+
+
 
 .fileBlock { display: flex; flex-direction: column; gap: 12px; }
 
@@ -46,3 +52,20 @@
 }
 .textarea { width: 100%; resize: vertical; }
 .mActions { display: flex; gap: 16px; margin-top: 8px; }
+
+
+/* бейдж‑статус под заголовком */
+.badge {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* цвета под каждый статус */
+.ON_REVIEW   { background:#ffe3a3; color:#7a5500; }
+.NEED_CLARIFY,
+.NEED_REWORK { background:#a3d0ff; color:#003c7a; }
+.COMPLETED   { background:#b6f2c2; color:#0b5b1c; }
