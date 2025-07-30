@@ -1,26 +1,48 @@
 // src/Services/auth.js
 import { api } from './api';
 
-/**
- * Выполняет логин, сохраняет токен и возвращает роль пользователя.
- */
-export async function login(email, password) {
+function parseJwt(token) {
   try {
-    const { data } = await api.post('/auth/login', { email, password });
-    const token = data.token;
-    localStorage.setItem('token', token);
+    const base64 = token.split('.')[1];
+    const json   = atob(base64.replace(/-/g, '+').replace(/_/g, '/'));
+    return JSON.parse(json);
+  } catch (e) {
+    console.error('🛠 parseJwt failed', e);
+    return {};
+  }
+}
 
-    // вручную декодируем payload JWT и достаём role
-    const [, payloadBase64] = token.split('.');
-    const payloadJson = atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/'));
-    const { role } = JSON.parse(payloadJson);
+export async function login(email, password) {
+  console.log('🛠 auth.login → start', { email, password });
+  try {
+    const resp = await api.post('/auth/login', { email, password });
+    console.log('🛠 auth.login ← axios response', resp);
+    const data = resp.data;
+    console.log('🛠 auth.login ← data', data);
 
-    return role; // e.g. "STUDENT" | "CREATOR" | "MODERATOR" | "TEACHER"
-  } catch {
+    if (!data.token) {
+      console.error('🛠 auth.login: token отсутствует в data');
+      return null;
+    }
+
+    localStorage.setItem('token', data.token);
+    const payload = parseJwt(data.token);
+    console.log('🛠 auth.login ← payload', payload);
+
+    if (!payload.role) {
+      console.error('🛠 auth.login: роль не найдена в payload');
+      return null;
+    }
+
+    return payload.role;
+  } catch (err) {
+    // если axios вернул 4xx/5xx, err.response есть
+    console.error('🛠 auth.login error', err.response ?? err);
     return null;
   }
 }
 
 export function logout() {
-localStorage.removeItem('token');
+  console.log('🛠 auth.logout');
+  localStorage.removeItem('token');
 }
