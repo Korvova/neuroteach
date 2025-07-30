@@ -10,23 +10,23 @@ const r = Router();
    Возвращает урок + (при наличии) связанный тест
 ────────────────────────────────────────────────── */
 r.get('/:id', authMw(), async (req, res) => {
-  const id = +req.params.id;
-
   const lesson = await prisma.lesson.findUnique({
-    where: { id },
+    where  : { id: +req.params.id },
     include: {
-      test: {
-        include: {
-          questions: {
-            include: { answers: true },
-          },
-        },
-      },
-    },
+      test: { include:{ questions:{ include:{ answers:true } } } },
+      progresses: {                     // только для текущего пользователя
+        where : { userId: req.user.id },
+        select: { status:true, meta:true }
+      }
+    }
   });
 
-  lesson ? res.json(json(lesson)) : res.status(404).end();
+  // кладём первый (или null) в поле progress, чтоб фронту было проще
+  lesson
+    ? res.json({ ...lesson, progress: lesson.progresses[0] ?? null })
+    : res.status(404).end();
 });
+
 
 /* ────────────────────────────────────────────────
    POST /lessons

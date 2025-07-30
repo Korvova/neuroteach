@@ -18,13 +18,17 @@ export default function CourseDetailPage() {
   if (!course) return null;
 
   /* ── рассчитываем “открытость” уроков + короткий statusCode ─────── */
-  const lessons = course.lessons.map((l, i, arr) => {
-    const statusCode = l.progresses?.[0]?.status ?? 'NOT_STARTED';
-    const unlocked   =
-      i === 0 || arr[i - 1].progresses?.[0]?.status === 'COMPLETED';
+const lessons = course.lessons.map((l, i, arr) => {
+  const statusCode = l.progress?.status        // новая версия бэка
+                  ?? l.progresses?.[0]?.status // старая (если осталась)
+                  ?? 'NOT_STARTED';
 
-    return { ...l, statusCode, unlocked };
-  });
+  const unlocked = i === 0
+    || arr[i-1].progress?.status    === 'COMPLETED'
+    || arr[i-1].progresses?.[0]?.status === 'COMPLETED';
+
+  return { ...l, statusCode, unlocked };
+});
 
   /* сколько уже пройдено */
   const completedCnt = lessons.filter((l) => l.statusCode === 'COMPLETED').length;
@@ -54,14 +58,14 @@ export default function CourseDetailPage() {
 
       <ul className={styles.list}>
         {lessons.map((l) => (
-          <LessonItem
-            key={l.id}
-            order={l.order}
-            title={l.title}
-            unlocked={l.unlocked}
-            statusCode={l.statusCode}        
-            onClick={() => openLesson(l)}
-          />
+    <LessonItem
+  key={l.id}
+  order={l.order}
+  title={l.title}
+  unlocked={l.unlocked}
+  statusCode={l.statusCode}
+  onClick={() => openLesson(l)}
+/>
         ))}
       </ul>
 

@@ -69,3 +69,5 @@
 .NEED_CLARIFY,
 .NEED_REWORK { background:#a3d0ff; color:#003c7a; }
 .COMPLETED   { background:#b6f2c2; color:#0b5b1c; }
+/* зелёная заливка для COMPLETED */
+.done { background:#e8f9ed; }

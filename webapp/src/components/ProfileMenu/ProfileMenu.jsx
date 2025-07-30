@@ -24,6 +24,7 @@ export default function ProfileMenu({ open, close }) {
           <li onClick={() => go('/profile/completed')}>Пройденные уроки</li>
           <li onClick={() => go('/profile/tasks')}>Задания</li>
           <li onClick={() => go('/profile/notifications')}>Уведомления</li>
+         
         </>
       )}
 

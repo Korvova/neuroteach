@@ -1,15 +1,15 @@
-/* LessonItem.module.css */
-.item  { position:relative; padding:14px 18px; border:1px solid #d0d0d0;
-         border-radius:8px; cursor:pointer; user-select:none; }
-.locked { background:#f1f1f1; cursor:default; }
-.done   { background:#e8f9ed; }           /* ← заливка «пройдено» */
+.item       { position:relative;padding:14px 18px;border:1px solid #d0d0d0;
+              border-radius:8px;user-select:none;cursor:pointer; }
+.locked     { background:#f1f1f1;cursor:default; }
+.done       { background:#e8f9ed; }          /* весь блок зеленоватый */
 
-.text   { display:block; }
+.text       { display:block; }
 
-.badge  { position:absolute; left:18px; top:-10px; padding:1px 8px;
-          border-radius:10px; font-size:11px; font-weight:500; }
-
-.ON_REVIEW   { background:#ffe7b0; color:#7a5500; }
+/* бейджи */
+.badge      { position:absolute;left:18px;top:-10px;
+              font-size:11px;font-weight:500;padding:1px 8px;
+              border-radius:10px; }
+.ON_REVIEW  { background:#ffe7b0;color:#7a5500; }
 .NEED_CLARIFY,
-.NEED_REWORK { background:#c0d9ff; color:#003c7a; }
-.COMPLETED   { background:#b6f2c2; color:#0b5b1c; }
+.NEED_REWORK{ background:#c0d9ff;color:#003c7a; }
+.COMPLETED  { background:#b6f2c2;color:#0b5b1c; }

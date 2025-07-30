@@ -11,9 +11,7 @@ import uploadRoutes     from './routes/upload.js';
 import { json as jsonFix } from './utils/jsonBigInt.js';
 import teacherRoutes from './routes/teacher.js';
 
-
-
-
+import progress from './routes/progress.js';
 
 import participantsRoutes from './routes/participants.js';
 import groupsRoutes       from './routes/groups.js';
@@ -44,7 +42,7 @@ app.use('/upload',  uploadRoutes);   // local → /uploads
 
 app.use('/teacher', teacherRoutes);
 
-
+app.use('/progress', progress);
 
 app.use('/participants', participantsRoutes);   // все под /participants
 app.use('/groups',       groupsRoutes);
