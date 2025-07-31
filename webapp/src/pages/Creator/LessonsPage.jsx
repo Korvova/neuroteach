@@ -46,7 +46,7 @@ export default function CreatorLessonsPage() {
         onClick={() => nav('/creator/lessons/new')}
         style={{ marginBottom: 12 }}
       >
-        Создать урок
+         Создать урок
       </Button>
 
       <Table
