@@ -65,4 +65,9 @@ export async function getLessons() {
 }
 
 
-
+/**
+ * DELETE /api/lessons/:id — удалить урок
+ */
+export async function deleteLesson(id) {
+  return api.delete(`/api/lessons/${id}`, authHeader());
+}

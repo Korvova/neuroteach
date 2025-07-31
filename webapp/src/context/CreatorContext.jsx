@@ -29,6 +29,9 @@ export function CreatorProvider({ children }) {
   const deleteLesson = (id) => setLessons(lessons.filter((l) => l.id !== id));
 
 
+
+  
+
  /* ── tests ── */
   const addTest    = (t) => setTests((prev) => prev.find(x => x.id===t.id) ? prev : [...prev, t]);
   const editTest   = (t) => setTests((prev) => prev.map(x => x.id===t.id ? t : x));

@@ -91,6 +91,36 @@ r.post('/', authMw(['CREATOR']), async (req, res) => {
 
 
 
+
+
+// DELETE /api/lessons/:id — удалить урок (CREATOR)
+r.delete('/:id', authMw(['CREATOR']), async (req, res) => {
+  const id = +req.params.id;
+  try {
+    // отвязываем прогрессы
+    await prisma.lessonProgress.deleteMany({ where: { lessonId: id } });
+    // (опционально) отвязываем сабмишны файлов, если нужно:
+    // await prisma.fileSubmission.deleteMany({ where: { lessonId: id } });
+    // удаляем сам урок
+    await prisma.lesson.delete({ where: { id } });
+    return res.status(204).end();
+  } catch (err) {
+    console.error('lesson.delete failed:', err);
+    if (err.code === 'P2025') {
+      return res.status(404).json({ error: 'not_found' });
+    }
+    return res.status(500).json({ error: 'lesson_delete_failed' });
+  }
+});
+
+
+
+
+
+
+
+
+
 // GET /api/lessons — вернуть все уроки (CREATOR)
 r.get('/', authMw(['CREATOR']), async (req, res) => {
 
