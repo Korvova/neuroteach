@@ -10,13 +10,15 @@ export async function getLessonComments(lessonId) {
 }
 
 
-
-// отметить VIEW-урок как COMPLETED
+/**
+ * Отметить VIEW-урок как COMPLETED
+ * POST /api/progress/complete
+ */
 export async function completeLesson(lessonId) {
   const { data } = await api.post(
     '/api/progress/complete',
     { lessonId },
-    authHeader()
+    authHeader()   // ← тут добавляем JWT-хедер
   );
   return data;
 }
