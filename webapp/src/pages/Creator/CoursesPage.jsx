@@ -1,90 +1,106 @@
-
 import { useState, useEffect } from 'react';
 import { useCreator } from '../../context/CreatorContext';
 import Table from '../../components/Table/Table';
 import Modal from '../../components/Modal/Modal';
 import Button from '../../components/Button/Button';
 import RichEditor from '../../components/RichEditor';
+import { getCourse }   from '../../Services/courses';
 
-import { getCourses, createCourse, deleteCourseAPI } from '../../Services/courses';
+import {
+  getCourses,
+  createCourse,
+  updateCourse,
+  deleteCourseAPI
+} from '../../Services/courses';
 
 export default function CreatorCoursesPage() {
   const { courses, addCourse, editCourse, deleteCourse } = useCreator();
   const [modalData, setModalData] = useState(null);
-  const isEdit = !!modalData?.id;
+  const isEdit = Boolean(modalData?.id);
 
-
-  // При первой загрузке подгружаем реальные курсы из API
+  // При первой загрузке подгружаем курсы
   useEffect(() => {
+    if (courses.length === 0) {
+      getCourses().then((list) => list.forEach((c) => addCourse(c)));
+    }
+  }, [courses.length, addCourse]);
 
-
-   if (courses.length === 0) {
-     getCourses().then((list) => list.forEach((c) => addCourse(c)));
-   }
-
-  }, []);
-
-
-
-
-  /* 🔹 утилита превью */
+  // Короткий текст для превью
   const preview = (desc) => {
-    // попытка распарсить DraftJS raw
     try {
       const raw = JSON.parse(desc);
       if (raw?.blocks) {
         const text = raw.blocks.map((b) => b.text).join(' ');
-        return slice(text);
+        return text.length > 40 ? text.slice(0, 40) + '…' : text;
       }
-    } catch (_) {}
-    // если не JSON — режем HTML / Markdown
-    return slice(stripHtml(desc));
+    } catch {}
+    const plain = desc.replace(/<[^>]+>/g, '');
+    return plain.length > 40 ? plain.slice(0, 40) + '…' : plain;
   };
-  const slice = (txt) => (txt.length > 40 ? txt.slice(0, 40) + '…' : txt);
-  const stripHtml = (h) => h.replace(/<[^>]+>/g, '');
 
   const rows = courses.map((c) => [
     c.id,
     c.title,
-    preview(c.desc || ''),
-    c.price ? `${c.price} ₽` : '—',
+    preview(c.description || ''),
+    c.price != null ? `${c.price} ₽` : '—',
     <Button key={c.id} variant="secondary" onClick={() => setModalData(c)}>
       Редактировать
-    </Button>,
+    </Button>
   ]);
 
   const save = async () => {
-    if (!modalData.title.trim()) return alert('Название?');
-    if (isEdit) {
-      editCourse(modalData);
-    } else {
-      try {
-        // создаём на бэке
-        const created = await createCourse(
-          modalData.title,
-          modalData.desc,
-          modalData.price ? Number(modalData.price) : null
-        );
-        addCourse(created);  // добавляем в контекст
-      } catch {
-        return alert('Не удалось создать курс');
-      }
+    if (!modalData.title.trim()) {
+      return alert('Пожалуйста, введите название');
     }
-    setModalData(null);
+
+    try {
+      if (isEdit) {
+        const updated = await updateCourse({
+          id:          modalData.id,
+          title:       modalData.title,
+          description: modalData.description,
+          price:       modalData.price ? Number(modalData.price) : null
+        });
+        editCourse(updated);
+      } else {
+        const created = await createCourse({
+          title:       modalData.title,
+          description: modalData.description,
+          price:       modalData.price ? Number(modalData.price) : null
+        });
+        addCourse(created);
+      }
+      setModalData(null);
+    } catch {
+      alert('Не удалось сохранить курс');
+    }
   };
 
+  const onDelete = async () => {
+    if (!confirm('Удалить курс?')) return;
+    try {
+      await deleteCourseAPI(modalData.id);
+      deleteCourse(modalData.id);
+      setModalData(null);
+    } catch {
+      alert('Не удалось удалить курс');
+    }
+  };
 
   return (
     <>
-      <Button onClick={() => setModalData({ title: '', desc: '', price: '' })}>
+      <Button onClick={() => setModalData({ title: '', description: '', price: '' })}>
         Создать курс
       </Button>
 
-      <Table head={['ID', 'Название', 'Описание', 'Стоимость', '']} rows={rows} />
+      <Table
+        head={['ID', 'Название', 'Описание', 'Стоимость', '']}
+        rows={rows}
+      />
 
       <Modal open={!!modalData} onClose={() => setModalData(null)}>
         {modalData && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: 400 }}>
             <h3>{isEdit ? 'Редактировать курс' : 'Новый курс'}</h3>
 
             <input
@@ -95,8 +111,8 @@ export default function CreatorCoursesPage() {
             />
 
             <RichEditor
-              value={modalData.desc}
-              onChange={(v) => setModalData({ ...modalData, desc: v })}
+              value={modalData.description}
+              onChange={(v) => setModalData({ ...modalData, description: v })}
               height={160}
             />
 
@@ -105,38 +121,12 @@ export default function CreatorCoursesPage() {
               placeholder="Стоимость, ₽"
               value={modalData.price}
               onChange={(e) => setModalData({ ...modalData, price: e.target.value })}
-              style={{ width: 180, padding: 8 }}
+              style={{ padding: 8, width: 120 }}
             />
 
-            <div style={{ display: 'flex', gap: 12, marginTop: 6 }}>
+            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
               <Button onClick={save}>Сохранить</Button>
-
-
- {isEdit && (
-                <Button
-                  variant="secondary"
-                onClick={async () => {
-                    if (confirm('Удалить курс?')) {
-                     
-
-     try {
-       await deleteCourseAPI(modalData.id);
-       deleteCourse(modalData.id); // из контекста
-     } catch {
-       alert('Не удалось удалить курс');
-       return;
-     }
-
-
-                      setModalData(null);
-                    }
-                  }}
-                >
-                  Удалить
-                </Button>
-              )}
-
-
+              {isEdit && <Button variant="secondary" onClick={onDelete}>Удалить</Button>}
               <Button variant="secondary" onClick={() => setModalData(null)}>
                 Отмена
               </Button>

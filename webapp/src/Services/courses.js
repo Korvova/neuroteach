@@ -1,8 +1,7 @@
 import { api, authHeader } from './api';
 
 /**
- * Список всех курсов (без уроков)
- * GET /courses          → [{id,title,price}, …]
+ * GET /api/courses
  */
 export async function getCourses() {
   const { data } = await api.get('/api/courses', authHeader());
@@ -10,17 +9,10 @@ export async function getCourses() {
 }
 
 /**
- * Один курс + уроки со статусами
- * GET /courses/:id      → {id,title,description,lessons:[…]}
+ * POST /api/courses
+ * body: { title, description, price }
  */
-export async function getCourse(id) {
-  const { data } = await api.get(`/api/courses/${id}`, authHeader());
-  return data;
-}
-
-
-// создать новый курс
-export async function createCourse(title, description, price) {
+export async function createCourse({ title, description, price }) {
   const { data } = await api.post(
     '/api/courses',
     { title, description, price },
@@ -29,8 +21,28 @@ export async function createCourse(title, description, price) {
   return data;
 }
 
+/**
+ * PUT /api/courses/:id
+ * body: { title, description, price }
+ */
+export async function updateCourse({ id, title, description, price }) {
+  const { data } = await api.put(
+    `/api/courses/${id}`,
+    { title, description, price },
+    authHeader()
+  );
+  return data;
+}
 
-// удалить курс
+/**
+ * DELETE /api/courses/:id
+ */
 export async function deleteCourseAPI(id) {
-  await api.delete(`/api/courses/${id}`, authHeader());
+  return api.delete(`/api/courses/${id}`, authHeader());
+}
+
+
+export async function getCourse(id) {
+  const { data } = await api.get(`/api/courses/${id}`, authHeader());
+  return data;
 }
