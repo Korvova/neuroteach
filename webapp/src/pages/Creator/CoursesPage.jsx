@@ -1,14 +1,25 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useCreator } from '../../context/CreatorContext';
 import Table from '../../components/Table/Table';
 import Modal from '../../components/Modal/Modal';
 import Button from '../../components/Button/Button';
 import RichEditor from '../../components/RichEditor';
+import { getCourses, createCourse } from '../../Services/courses';  // ← импортируем
 
 export default function CreatorCoursesPage() {
-  const { courses, addCourse, editCourse } = useCreator();
+  const { courses, addCourse, editCourse, deleteCourse } = useCreator();
   const [modalData, setModalData] = useState(null);
   const isEdit = !!modalData?.id;
+
+
+  // При первой загрузке подгружаем реальные курсы из API
+  useEffect(() => {
+    getCourses().then((list) => list.forEach((c) => addCourse(c)));
+  }, []);
+
+
+
 
   /* 🔹 утилита превью */
   const preview = (desc) => {
@@ -36,11 +47,26 @@ export default function CreatorCoursesPage() {
     </Button>,
   ]);
 
-  const save = () => {
+  const save = async () => {
     if (!modalData.title.trim()) return alert('Название?');
-    isEdit ? editCourse(modalData) : addCourse({ ...modalData, id: Date.now() });
+    if (isEdit) {
+      editCourse(modalData);
+    } else {
+      try {
+        // создаём на бэке
+        const created = await createCourse(
+          modalData.title,
+          modalData.desc,
+          modalData.price ? Number(modalData.price) : null
+        );
+        addCourse(created);  // добавляем в контекст
+      } catch {
+        return alert('Не удалось создать курс');
+      }
+    }
     setModalData(null);
   };
+
 
   return (
     <>

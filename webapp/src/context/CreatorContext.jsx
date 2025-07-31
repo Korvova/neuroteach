@@ -8,7 +8,7 @@ export function CreatorProvider({ children }) {
   const [tests,   setTests]   = useState([]);
 
   /* ── courses ── */
-  const addCourse    = (c) => setCourses([...courses, c]);
+ const addCourse    = (c) => setCourses((prev) => [...prev, c]); 
   const editCourse   = (c) => setCourses(courses.map((x) => (x.id === c.id ? c : x)));
   const deleteCourse = (id) => setCourses(courses.filter((c) => c.id !== id));
 

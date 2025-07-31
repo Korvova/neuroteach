@@ -17,3 +17,14 @@ export async function getCourse(id) {
   const { data } = await api.get(`/api/courses/${id}`, authHeader());
   return data;
 }
+
+
+// создать новый курс
+export async function createCourse(title, description, price) {
+  const { data } = await api.post(
+    '/api/courses',
+    { title, description, price },
+    authHeader()
+  );
+  return data;
+}

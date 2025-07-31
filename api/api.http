@@ -1,6 +1,6 @@
 @host = https://neuroteach.ru
 
-### Получить токен
+### Получить токен ученика
 POST {{host}}/api/auth/login
 Content-Type: application/json
 
@@ -21,4 +21,33 @@ Content-Type: application/json
 
 {
   "text": "Привет, это тестовый вопрос по уроку"
+}
+
+
+
+
+
+
+### Получить токен создателя
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@mail.com",    
+  "password": "secret"
+}
+
+
+
+
+
+### Создать новый курс
+POST {{host}}/api/courses
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkNSRUFUT1IiLCJpYXQiOjE3NTM5NTA3NTksImV4cCI6MTc1NDU1NTU1OX0.-CUuOp_Hslfynt_IgFDJF_pCew8fujYLgQXyK0OAFHE
+Content-Type: application/json
+
+{
+  "title": "Новый курс по нейросетям",
+  "description": { "blocks": [{ "text": "Описание курса" }] },
+  "price": 0
 }

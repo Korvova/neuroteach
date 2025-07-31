@@ -51,14 +51,26 @@ r.get('/:id', authMw(), async (req, res) => {
 
 
 
-/* ───────── 3. создать курс (Creator) ───────── */
-r.post('/', authMw(['CREATOR']), async (req, res) => {
-  const { title, description, price } = req.body;
 
-  const c = await prisma.course.create({
-    data: { title, description, price },
-  });
-  res.json(json(c));
+
+
+
+
+// POST /api/courses — создать новый курс
+r.post('/', authMw(['CREATOR']), async (req, res) => {
+  try {
+    const { title, description, price } = req.body;
+    const course = await prisma.course.create({
+      data: { title, description, price: price || null }
+    });
+    res.status(201).json(course);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'course_create_failed' });
+  }
 });
+
+
+
 
 export default r;
