@@ -5,7 +5,8 @@ import Table from '../../components/Table/Table';
 import Modal from '../../components/Modal/Modal';
 import Button from '../../components/Button/Button';
 import RichEditor from '../../components/RichEditor';
-import { getCourses, createCourse } from '../../Services/courses';  // ← импортируем
+
+import { getCourses, createCourse, deleteCourseAPI } from '../../Services/courses';
 
 export default function CreatorCoursesPage() {
   const { courses, addCourse, editCourse, deleteCourse } = useCreator();
@@ -109,9 +110,19 @@ export default function CreatorCoursesPage() {
  {isEdit && (
                 <Button
                   variant="secondary"
-                  onClick={() => {
+                onClick={async () => {
                     if (confirm('Удалить курс?')) {
-                      deleteCourse(modalData.id);
+                     
+
+     try {
+       await deleteCourseAPI(modalData.id);
+       deleteCourse(modalData.id); // из контекста
+     } catch {
+       alert('Не удалось удалить курс');
+       return;
+     }
+
+
                       setModalData(null);
                     }
                   }}

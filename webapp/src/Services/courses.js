@@ -28,3 +28,9 @@ export async function createCourse(title, description, price) {
   );
   return data;
 }
+
+
+// удалить курс
+export async function deleteCourseAPI(id) {
+  await api.delete(`/api/courses/${id}`, authHeader());
+}

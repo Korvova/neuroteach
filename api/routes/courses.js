@@ -73,4 +73,19 @@ r.post('/', authMw(['CREATOR']), async (req, res) => {
 
 
 
+// DELETE /api/courses/:id — удалить курс по ID
+r.delete('/:id', authMw(['CREATOR']), async (req, res) => {
+  const id = Number(req.params.id);
+  try {
+    await prisma.course.delete({ where: { id } });
+    res.status(204).end();
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'course_delete_failed' });
+  }
+});
+
+
+
+
 export default r;
