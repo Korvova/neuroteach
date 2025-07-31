@@ -8,6 +8,9 @@ import { uploadFile }     from '../../Services/upload';
 import Modal   from '../../components/Modal/Modal';
 import styles  from './LessonPage.module.css';
 
+import draftToHtml from 'draftjs-to-html';
+import { convertFromRaw } from 'draft-js';
+
 import { completeLesson } from '../../Services/progress';
 
 
@@ -101,19 +104,34 @@ setLesson({ ...lesson, progress:{ status:'ON_REVIEW' } });
     );
   }
 
-  /* ---------- VIEW‑урок ---------- */
-/* ---------- VIEW-урок ---------- */
+
+
+
+/* ─── внутри секции VIEW ─── */
 if (lesson.checkType === 'VIEW') {
+  // 1) достаём сырой raw-объект
+  const raw = typeof lesson.content === 'string'
+    ? JSON.parse(lesson.content)
+    : lesson.content;
+
+  // отрисуем через draftToHtml прямо raw
+
+ let html = draftToHtml(raw);
+
+  // отладка
+  console.log('lesson.content:', lesson.content);
+  console.log('raw:', raw);
+  console.log('html from draftToHtml:', html);
+
   return (
     <div className={styles.container}>
       <StatusBadge />
       <h2 className={styles.title}>{lesson.title}</h2>
 
-      <div className={styles.content}>
-        {lesson.content?.blocks?.map((b, i) => (
-          <p key={i}>{b.text}</p>
-        ))}
-      </div>
+      <div
+        className={styles.content}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
 
       <button
         className={styles.primary}
@@ -126,17 +144,13 @@ if (lesson.checkType === 'VIEW') {
         Далее
       </button>
 
-      <LessonComments 
-        lessonId={lesson.id} 
-        onStatusChange={setStatus} 
+      <LessonComments
+        lessonId={lesson.id}
+        onStatusChange={setStatus}
       />
     </div>
   );
 }
-
-
-
-
 
 
   /* ---------- TEST‑урок ---------- */
