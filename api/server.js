@@ -11,14 +11,12 @@ import uploadRoutes     from './routes/upload.js';
 import { json as jsonFix } from './utils/jsonBigInt.js';
 import teacherRoutes from './routes/teacher.js';
 
- import progress from './routes/progress.js';
-
-import participantsRoutes from './routes/participants.js';
-import groupsRoutes       from './routes/groups.js';
-import paymentsRoutes     from './routes/payments.js';
-import progressRoutes from './routes/lessonProgress.js';
-import lessonCommentsRoutes from './routes/lessonComments.js';
-
+import progressRoutes        from './routes/progress.js';
+import lessonProgressRoutes  from './routes/lessonProgress.js';
+import lessonCommentsRoutes  from './routes/lessonComments.js';
+import participantsRoutes    from './routes/participants.js';
+import groupsRoutes          from './routes/groups.js';
+import paymentsRoutes        from './routes/payments.js';
 
 
 const app = express();
@@ -60,7 +58,8 @@ app.use(`${API}/participants`, participantsRoutes);
 app.use(`${API}/groups`,       groupsRoutes);
 app.use(`${API}/payments`,     paymentsRoutes);
 
-
+app.use(`${API}/progress`, progressRoutes);
+app.use(`${API}/lesson-progress`, lessonProgressRoutes);
 app.use(`${API}/lessonComments`, lessonCommentsRoutes);
 
 

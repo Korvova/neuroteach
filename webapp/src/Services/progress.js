@@ -9,6 +9,20 @@ export async function getLessonComments(lessonId) {
   return data;
 }
 
+
+
+// отметить VIEW-урок как COMPLETED
+export async function completeLesson(lessonId) {
+  const { data } = await api.post(
+    '/api/progress/complete',
+    { lessonId },
+    authHeader()
+  );
+  return data;
+}
+
+
+
 // отправить новый комментарий (вопрос) по уроку
 export async function sendLessonComment(lessonId, text) {
   const { data } = await api.post(

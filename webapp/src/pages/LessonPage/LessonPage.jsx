@@ -8,6 +8,8 @@ import { uploadFile }     from '../../Services/upload';
 import Modal   from '../../components/Modal/Modal';
 import styles  from './LessonPage.module.css';
 
+import { completeLesson } from '../../Services/progress';
+
 
 import LessonComments from '../../components/LessonComments/LessonComments';
 
@@ -100,28 +102,37 @@ setLesson({ ...lesson, progress:{ status:'ON_REVIEW' } });
   }
 
   /* ---------- VIEW‑урок ---------- */
-  if (lesson.checkType === 'VIEW') {
-    return (
-      <div className={styles.container}>
-        <StatusBadge />
-        <h2 className={styles.title}>{lesson.title}</h2>
+/* ---------- VIEW-урок ---------- */
+if (lesson.checkType === 'VIEW') {
+  return (
+    <div className={styles.container}>
+      <StatusBadge />
+      <h2 className={styles.title}>{lesson.title}</h2>
 
-        <div className={styles.content}>
-          {lesson.content?.blocks?.map((b, i) => <p key={i}>{b.text}</p>)}
-        </div>
-
-        <button className={styles.primary} onClick={handleNext}>Далее</button>
-
-
-<LessonComments 
-  lessonId={lesson.id} 
-  onStatusChange={setStatus} 
-/>
-
+      <div className={styles.content}>
+        {lesson.content?.blocks?.map((b, i) => (
+          <p key={i}>{b.text}</p>
+        ))}
       </div>
 
-    );
-  }
+      <button
+        className={styles.primary}
+        onClick={async () => {
+          await completeLesson(lesson.id);
+          setStatus('COMPLETED');
+          handleNext();
+        }}
+      >
+        Далее
+      </button>
+
+      <LessonComments 
+        lessonId={lesson.id} 
+        onStatusChange={setStatus} 
+      />
+    </div>
+  );
+}
 
 
 

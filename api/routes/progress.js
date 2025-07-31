@@ -9,6 +9,31 @@ const r = Router();
 /*  POST /progress
     body: { lessonId, score, total }
 */
+
+
+
+// POST /api/progress/complete — отметить VIEW-урок как COMPLETED
+r.post('/complete', authMw(['STUDENT']), async (req, res) => {
+  const { lessonId } = req.body;
+  const userId = req.user.id;
+
+  const prog = await prisma.lessonProgress.upsert({
+    where: { userId_lessonId: { userId, lessonId } },
+    update: { status: LessonStatus.COMPLETED },
+    create: { userId, lessonId, status: LessonStatus.COMPLETED },
+  });
+  res.json(prog);
+});
+
+
+
+
+
+
+
+
+
+
 r.post('/', authMw(), async (req, res) => {
   try {
     const { lessonId, score, total } = req.body;
