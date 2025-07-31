@@ -44,27 +44,7 @@ r.post('/', authMw(['CREATOR']), async (req, res) => {
   res.status(201).json(json(test));
 });
 
-// PUT /api/tests/:id — обновить тест
-r.put('/:id', authMw(['CREATOR']), async (req, res) => {
-  const data = req.body;
-  // Для простоты: удалим старые вопросы+ответы и создадим новые
-  await prisma.question.deleteMany({ where: { testId: +req.params.id } });
-  const test = await prisma.test.update({
-    where: { id: +req.params.id },
-    data: {
-      title: data.title,
-      questions: {
-        create: data.questions.map((q) => ({
-          text: q.text,
-          type: q.type,
-          answers: { create: q.answers },
-        })),
-      },
-    },
-    include: { questions: { include: { answers: true } } },
-  });
-  res.json(json(test));
-});
+
 
 
 
@@ -107,7 +87,57 @@ r.delete('/:id', authMw(['CREATOR']), async (req, res) => {
 
 
 
+/**
+ * PUT /api/tests/:id
+ * Обновить тест целиком: title + вопросы + ответы
+ * Роль: CREATOR
+ */
+r.put('/:id', authMw(['CREATOR']), async (req, res) => {
+  const testId = +req.params.id;
+  const { title, questions } = req.body;
 
+  try {
+    // 1) сначала удаляем ВСЕ ответы, связанные с вопросами этого теста
+    await prisma.answer.deleteMany({
+      where: {
+        question: { testId }
+      }
+    });
+
+    // 2) затем удаляем ВСЕ вопросы
+    await prisma.question.deleteMany({
+      where: { testId }
+    });
+
+    // 3) теперь можем обновить заголовок и создать новые вопросы+ответы
+    const updated = await prisma.test.update({
+      where: { id: testId },
+      data: {
+        title,
+        questions: {
+          create: questions.map((q) => ({
+            text:  q.text,
+            type:  q.type,
+            answers: {
+              create: q.answers.map((a) => ({
+                text:    a.text,
+                correct: a.correct
+              }))
+            }
+          }))
+        }
+      },
+      include: {
+        questions: { include: { answers: true } }
+      }
+    });
+
+    res.json(json(updated));
+  } catch (e) {
+    console.error('test_update_failed', e);
+    res.status(500).json({ error: 'test_update_failed' });
+  }
+});
 
 
 
