@@ -8,17 +8,33 @@ export function CreatorProvider({ children }) {
   const [tests,   setTests]   = useState([]);
 
   /* ── courses ── */
- const addCourse    = (c) => setCourses((prev) => [...prev, c]); 
+  const addCourse    = (c) => setCourses((prev) => {
+    // если уже есть — не добавляем
+    if (prev.find(x => x.id === c.id)) return prev;
+    return [...prev, c];
+  });
   const editCourse   = (c) => setCourses(courses.map((x) => (x.id === c.id ? c : x)));
   const deleteCourse = (id) => setCourses(courses.filter((c) => c.id !== id));
 
   /* ── lessons ── */
-  const addLesson    = (l) => setLessons([...lessons, l]);
+ 
+
+
+  const addLesson    = (l) => setLessons((prev) => {
+    if (prev.find(x => x.id === l.id)) return prev;
+    return [...prev, l];
+  });
   const editLesson   = (l) => setLessons(lessons.map((x) => (x.id === l.id ? l : x)));
   const deleteLesson = (id) => setLessons(lessons.filter((l) => l.id !== id));
 
   /* ── tests (без удаления пока) ── */
-  const addTest  = (t) => setTests([...tests, t]);
+
+  const addTest  = (t) => setTests((prev) => {
+    if (prev.find(x => x.id === t.id)) return prev;
+    return [...prev, t];
+  });
+
+
   const editTest = (t) => setTests(tests.map((x) => (x.id === t.id ? t : x)));
 
   return (

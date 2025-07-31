@@ -51,3 +51,9 @@ Content-Type: application/json
   "description": { "blocks": [{ "text": "Описание курса" }] },
   "price": 0
 }
+
+### Получить все уроки 
+
+GET {{host}}/api/lessons
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkNSRUFUT1IiLCJpYXQiOjE3NTM5NTA3NTksImV4cCI6MTc1NDU1NTU1OX0.-CUuOp_Hslfynt_IgFDJF_pCew8fujYLgQXyK0OAFHE
+Content-Type: application/json

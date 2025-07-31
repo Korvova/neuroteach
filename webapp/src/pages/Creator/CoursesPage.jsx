@@ -16,7 +16,12 @@ export default function CreatorCoursesPage() {
 
   // При первой загрузке подгружаем реальные курсы из API
   useEffect(() => {
-    getCourses().then((list) => list.forEach((c) => addCourse(c)));
+
+
+   if (courses.length === 0) {
+     getCourses().then((list) => list.forEach((c) => addCourse(c)));
+   }
+
   }, []);
 
 

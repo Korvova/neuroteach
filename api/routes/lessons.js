@@ -28,26 +28,7 @@ r.get('/:id', authMw(), async (req, res) => {
 });
 
 
-/* ────────────────────────────────────────────────
-   POST /lessons
-   Создать новый урок            (если body.id отсутствует)
-   или обновить существующий     (если body.id передан)
-   Роль: CREATOR
-────────────────────────────────────────────────── */
-r.post('/', authMw(['CREATOR']), async (req, res) => {
-  const data = req.body;                       // courseId, order, title, ...
 
-  // конвертируем BigInt‑поля в number
-  if (data.id)       data.id       = +data.id;
-  if (data.courseId) data.courseId = +data.courseId;
-  if (data.testId)   data.testId   = +data.testId;
-
-  const lesson = data.id
-    ? await prisma.lesson.update({ where: { id: data.id }, data })
-    : await prisma.lesson.create({ data });
-
-  res.json(json(lesson));
-});
 
 /* ────────────────────────────────────────────────
    PUT /lessons/:id
@@ -68,6 +49,61 @@ r.put('/:id', authMw(['CREATOR']), async (req, res) => {
     res.status(404).end();
   }
 });
+
+
+
+
+
+
+
+
+// POST /api/lessons — создать новый урок (CREATOR)
+r.post('/', authMw(['CREATOR']), async (req, res) => {
+  console.log('🔍 createLesson body:', req.body);
+  const { courseId, title, order, content, checkType, testId } = req.body;
+  try {
+    const lesson = await prisma.lesson.create({
+      data: {
+        courseId,
+        title,
+        order,
+        content,
+        checkType,
+        ...(checkType === 'TEST' && testId ? { testId } : {})
+      }
+    });
+    return res.status(201).json(lesson);
+  } catch (e) {
+    console.error('❌ createLesson error:', e);
+    if (e.code === 'P2002' && e.meta?.target?.includes('courseId') && e.meta.target.includes('order')) {
+      // нашли конфликт по courseId+order
+      const existing = await prisma.lesson.findFirst({
+        where: { courseId, order }
+      });
+      return res.status(409).json({
+        error: 'duplicate_order',
+        existingId: existing.id
+      });
+    }
+    return res.status(500).json({ error: 'lesson_create_failed' });
+  }
+});
+
+
+
+// GET /api/lessons — вернуть все уроки (CREATOR)
+r.get('/', authMw(['CREATOR']), async (req, res) => {
+
+  const list = await prisma.lesson.findMany({
+    orderBy: [
+      { courseId: 'asc' },
+      { order:    'asc' },
+    ]
+  });
+  res.json(list);
+});
+
+
 
 export default r;
 

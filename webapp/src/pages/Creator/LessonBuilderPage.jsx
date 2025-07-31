@@ -1,8 +1,15 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCreator } from '../../context/CreatorContext';
-import { useState } from 'react';
+
 import Button from '../../components/Button/Button';
 import RichEditor from '../../components/RichEditor';
+
+import { useState } from 'react';
+import { createLesson, updateLesson } from '../../Services/lessons';
+
+
+
+
 
 export default function LessonBuilderPage() {
   const { lessonId } = useParams();          // 'new' | id
@@ -17,17 +24,66 @@ export default function LessonBuilderPage() {
       title: '',
       courseId: courses[0]?.id,
       order: 1,
-      checkType: 'view',
+       checkType: 'VIEW',
       content: '',
       testId: '',
     }
   );
 
-  const save = () => {
+
+ const save = async () => {
     if (!form.title.trim()) return alert('Название?');
-    existing ? editLesson(form) : addLesson({ ...form, id: Date.now() });
-    nav('/creator/lessons');
+    try {
+      if (existing) {
+        // обновляем через API
+        const updated = await updateLesson(existing.id, {
+          courseId: form.courseId,
+          order:    form.order,
+          title:    form.title,
+          content:  form.content,
+          checkType: form.checkType,
+          testId:   form.checkType === 'TEST' ? form.testId : undefined,
+        });
+        editLesson(updated);
+      } else {
+        // создаём новый через API
+        const created = await createLesson({
+          courseId: form.courseId,
+          order:    form.order,
+          title:    form.title,
+          content:  form.content,
+          checkType: form.checkType,
+          testId:   form.checkType === 'TEST' ? form.testId : undefined,
+        });
+        addLesson(created);
+      }
+      nav('/creator/lessons');
+    } 
+catch (err) {
+    // теперь err доступен
+    if (err.response?.status === 409 && err.response.data.error === 'duplicate_order') {
+      const { existingId } = err.response.data;
+      if (confirm('Урок с таким номером уже есть. Перезаписать?')) {
+        const overwritten = await updateLesson(existingId, {
+          courseId: form.courseId,
+          order:    form.order,
+          title:    form.title,
+          content:  form.content,
+          checkType: form.checkType,
+          testId:   form.checkType === 'TEST' ? form.testId : undefined,
+        });
+        editLesson(overwritten);
+        nav('/creator/lessons');
+        return;
+      }
+    }
+    alert('Не удалось сохранить урок');
+  }
+
+
+
   };
+
 
   return (
     <div style={{ maxWidth: 800, marginBottom: 40 }}>
@@ -76,17 +132,17 @@ export default function LessonBuilderPage() {
       <label style={{ display: 'block', marginTop: 12 }}>
         Проверка:
         <select
-          value={form.checkType}
-          onChange={(e) => setForm({ ...form, checkType: e.target.value })}
+ value={form.checkType}
+         onChange={(e) => setForm({ ...form, checkType: e.target.value })}
           style={{ marginLeft: 6, padding: 6 }}
         >
-          <option value="view">далее</option>
-          <option value="file">файл</option>
-          <option value="test">тест</option>
+            <option value="VIEW">далее</option>
+          <option value="FILE">файл</option>
+          <option value="TEST">тест</option>
         </select>
       </label>
 
-      {form.checkType === 'test' && (
+       {form.checkType === 'TEST' && (
         tests.length ? (
           <select
             value={form.testId || ''}
