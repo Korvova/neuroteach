@@ -68,3 +68,6 @@ app.use(`${API}/lessonComments`, lessonCommentsRoutes);
 app.use(`${API}/uploads`, express.static('uploads'));
 
 app.listen(4000, () => console.log('API listening on :4000'));
+
+
+

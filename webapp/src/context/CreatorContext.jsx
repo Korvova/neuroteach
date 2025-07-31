@@ -7,6 +7,7 @@ export function CreatorProvider({ children }) {
   const [lessons, setLessons] = useState([]);
   const [tests,   setTests]   = useState([]);
 
+
   /* ── courses ── */
   const addCourse    = (c) => setCourses((prev) => {
     // если уже есть — не добавляем
@@ -27,32 +28,19 @@ export function CreatorProvider({ children }) {
   const editLesson   = (l) => setLessons(lessons.map((x) => (x.id === l.id ? l : x)));
   const deleteLesson = (id) => setLessons(lessons.filter((l) => l.id !== id));
 
-  /* ── tests (без удаления пока) ── */
 
-  const addTest  = (t) => setTests((prev) => {
-    if (prev.find(x => x.id === t.id)) return prev;
-    return [...prev, t];
-  });
-
-
-  const editTest = (t) => setTests(tests.map((x) => (x.id === t.id ? t : x)));
+ /* ── tests ── */
+  const addTest    = (t) => setTests((prev) => prev.find(x => x.id===t.id) ? prev : [...prev, t]);
+  const editTest   = (t) => setTests((prev) => prev.map(x => x.id===t.id ? t : x));
+  const deleteTest = (id) => setTests((prev) => prev.filter(t => t.id !== id));
 
   return (
-    <Ctx.Provider
-      value={{
-        courses,
-        lessons,
-        tests,
-        addCourse,
-        editCourse,
-        deleteCourse,
-        addLesson,
-        editLesson,
-        deleteLesson,
-        addTest,
-        editTest,
-      }}
-    >
+    <Ctx.Provider value={{
+      courses, lessons, tests,
+      addCourse, editCourse, deleteCourse,
+      addLesson, editLesson, deleteLesson,
+      addTest, editTest, deleteTest,   // ← не забывай сюда добавить!
+    }}>
       {children}
     </Ctx.Provider>
   );
