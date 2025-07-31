@@ -17,7 +17,7 @@ import participantsRoutes from './routes/participants.js';
 import groupsRoutes       from './routes/groups.js';
 import paymentsRoutes     from './routes/payments.js';
 import progressRoutes from './routes/lessonProgress.js';
-
+import lessonCommentsRoutes from './routes/lessonComments.js';
 
 
 
@@ -60,6 +60,8 @@ app.use(`${API}/participants`, participantsRoutes);
 app.use(`${API}/groups`,       groupsRoutes);
 app.use(`${API}/payments`,     paymentsRoutes);
 
+
+app.use(`${API}/lessonComments`, lessonCommentsRoutes);
 
 
 

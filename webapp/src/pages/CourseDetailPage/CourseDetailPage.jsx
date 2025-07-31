@@ -12,6 +12,10 @@ export default function CourseDetailPage() {
   const [course, setCourse]     = useState(null);
   const [locked, setLocked]     = useState(false);
 
+
+
+
+
   /* ── загрузка курса ─────────────────────────────── */
   useEffect(() => { getCourse(courseId).then(setCourse); }, [courseId]);
 
@@ -23,9 +27,13 @@ const lessons = course.lessons.map((l, i, arr) => {
                   ?? l.progresses?.[0]?.status // старая (если осталась)
                   ?? 'NOT_STARTED';
 
+
+
+  const allowed = ['COMPLETED','ON_REVIEW','NEED_CLARIFY'];
   const unlocked = i === 0
-    || arr[i-1].progress?.status    === 'COMPLETED'
-    || arr[i-1].progresses?.[0]?.status === 'COMPLETED';
+
+  || allowed.includes(arr[i-1].progress?.status)
+  || allowed.includes(arr[i-1].progresses?.[0]?.status);
 
   return { ...l, statusCode, unlocked };
 });

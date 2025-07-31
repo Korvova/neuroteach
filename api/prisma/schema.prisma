@@ -74,6 +74,7 @@ model User {
   payments      Payment[]        @relation("Buyer")
 
   fileUploads FileSubmission[] @relation("StudentFiles")
+   lessonComments LessonComment[] @relation("UserToComments")
 
   /**
    * 🔹 учитель проверяет файлы
@@ -142,6 +143,10 @@ model Lesson {
   createdAt DateTime @default(now())
 
   @@unique([courseId, order]) // один номер в рамках курса
+
+comments  LessonComment[] @relation("LessonToComments")
+
+
 }
 
 model Test {
@@ -243,6 +248,36 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 }
+
+
+
+
+/**
+ * ************************************************************
+ * Комментарии
+ * ************************************************************
+ */
+
+
+model LessonComment {
+  id         BigInt   @id @default(autoincrement())
+  lessonId   BigInt
+  authorId   BigInt
+  text       String
+  createdAt  DateTime @default(now())
+
+  lesson    Lesson   @relation("LessonToComments", fields: [lessonId], references: [id])
+  author    User     @relation("UserToComments",       fields: [authorId], references: [id])
+
+  @@index([lessonId])
+}
+
+
+
+
+
+
+
 
 /**
  * ************************************************************

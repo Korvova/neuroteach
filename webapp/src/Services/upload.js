@@ -1,13 +1,16 @@
-import { api } from './api';
+import { api, authHeader } from './api';
 
-export function uploadFile(lessonId, file) {
-  const fd = new FormData();
-  fd.append('file', file);
-  fd.append('lessonId', lessonId);
+export async function uploadFile(lessonId, file) {
+  const form = new FormData();
+  form.append('lessonId', lessonId);
+  form.append('file', file);
 
+  // объединяем заголовки: авторизация + multipart
+  const headers = {
+    ...authHeader().headers,
+    'Content-Type': 'multipart/form-data'
+  };
 
-  return api.post('/api/upload', fd)   // boundary проставит axios
-           .then(r => r.data);
-
-
+  const { data } = await api.post('/api/upload', form, { headers });
+  return data;
 }

@@ -20,32 +20,31 @@ const r = Router();
 /* POST /upload  (form‑data: file, lessonId) → { url } */
 r.post('/', authMw(), upload.single('file'), async (req, res) => {
   try {
+
+
+    console.log('🔍 upload body:', req.body, 'file:', req.file);
     const lessonId = Number(req.body.lessonId);
     const fileUrl  = `/uploads/${req.file.filename}`;
 
     await prisma.$transaction([
-      prisma.lessonProgress.upsert({
-        where: {
-          userId_lessonId: { userId: req.user.id, lessonId },
-        },
-       
-
-   /* обязательно передаём student и lesson
-      (иначе Prisma ругается, что поле не заполнено) */
-   update: {
-     status : LessonStatus.ON_REVIEW,
-     student: { connect: { id: req.user.id } },
-     lesson : { connect: { id: lessonId    } },
-   },
 
 
+    prisma.lessonProgress.upsert({
+      where: {
+        userId_lessonId: { userId: req.user.id, lessonId },
+      },
+      update: {
+        status: LessonStatus.ON_REVIEW,
+      },
+      create: {
+        userId: req.user.id,
+        lessonId,
+        status: LessonStatus.ON_REVIEW,
+      },
+    }),
 
-        create: {
-          status: LessonStatus.ON_REVIEW,
-          user:   { connect: { id: req.user.id } },
-          lesson: { connect: { id: lessonId    } },
-        },
-      }),
+
+
       prisma.fileSubmission.create({
         data: {
           filePath: fileUrl,

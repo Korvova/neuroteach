@@ -8,6 +8,10 @@ import { uploadFile }     from '../../Services/upload';
 import Modal   from '../../components/Modal/Modal';
 import styles  from './LessonPage.module.css';
 
+
+import LessonComments from '../../components/LessonComments/LessonComments';
+
+
 export default function LessonPage() {
   const { lessonId } = useParams();
   const navigate     = useNavigate();
@@ -83,6 +87,13 @@ setLesson({ ...lesson, progress:{ status:'ON_REVIEW' } });
           >
             {sent ? 'Отправлено ✔' : 'Отправить'}
           </button>
+
+<LessonComments 
+  lessonId={lesson.id} 
+  onStatusChange={setStatus} 
+/>
+
+
         </div>
       </div>
     );
@@ -100,9 +111,22 @@ setLesson({ ...lesson, progress:{ status:'ON_REVIEW' } });
         </div>
 
         <button className={styles.primary} onClick={handleNext}>Далее</button>
+
+
+<LessonComments 
+  lessonId={lesson.id} 
+  onStatusChange={setStatus} 
+/>
+
       </div>
+
     );
   }
+
+
+
+
+
 
   /* ---------- TEST‑урок ---------- */
   if (lesson.checkType === 'TEST') {
@@ -175,6 +199,14 @@ setLesson({ ...lesson, progress:{ status:'ON_REVIEW' } });
             )}
           </Modal>
         )}
+
+
+<LessonComments 
+  lessonId={lesson.id} 
+  onStatusChange={setStatus} 
+/>
+
+
       </div>
     );
   }

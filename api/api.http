@@ -1,0 +1,24 @@
+@host = https://neuroteach.ru
+
+### Получить токен
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ivan@mail.com",
+  "password": "123"
+}
+
+### Получить комментарии к уроку 1
+GET {{host}}/api/lessonComments/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3NTM5NDYwNTEsImV4cCI6MTc1NDU1MDg1MX0.415FQlDkJkZipl2atEfyOO1TwTQgJb7AMWrIKOaztrI
+
+
+### Добавить комментарий
+POST {{host}}/api/lessonComments/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3NTM5NDYwNTEsImV4cCI6MTc1NDU1MDg1MX0.415FQlDkJkZipl2atEfyOO1TwTQgJb7AMWrIKOaztrI
+Content-Type: application/json
+
+{
+  "text": "Привет, это тестовый вопрос по уроку"
+}
