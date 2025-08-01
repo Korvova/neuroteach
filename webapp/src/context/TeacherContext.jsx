@@ -1,40 +1,32 @@
 // src/context/TeacherContext.jsx
-import { createContext, useContext, useEffect, useState } from 'react';
-import * as teacherAPI from '../Services/teacher';
+import { createContext, useContext, useState, useEffect } from 'react';
+import { getReview, getClarify, reviewAction, clarifyReply } from '../Services/teacher';
 
-const Ctx = createContext();
+const Ctx = createContext(null);
 
 export function TeacherProvider({ children }) {
-  const [review,  setReview]  = useState([]);
+  const [review, setReview]   = useState([]);
   const [clarify, setClarify] = useState([]);
 
-  // при монтировании подгружаем данные
+  // загрузка при монтировании
   useEffect(() => {
-    teacherAPI.getReview().then(setReview).catch(console.error);
-    teacherAPI.getClarify().then(setClarify).catch(console.error);
+    getReview().then(setReview).catch(console.error);
+    getClarify().then(setClarify).catch(console.error);
   }, []);
 
-  // подтвердить / вернуть на доработку
   const approve = async (userId, lessonId) => {
-    await teacherAPI.reviewAction(userId, lessonId, 'READY');
-    setReview((r) => r.filter((x) => !(+x.user.id===+userId && +x.lesson.id===+lessonId)));
+    await reviewAction(userId, lessonId, 'READY');
+    setReview((r) => r.filter(it => !(it.user.id===userId && it.lesson.id===lessonId)));
   };
 
   const requestRedo = async (userId, lessonId, comment) => {
-    await teacherAPI.reviewAction(userId, lessonId, 'RETURN', comment);
-    setReview((r) => r.filter((x) => !(+x.user.id===+userId && +x.lesson.id===+lessonId)));
+    await reviewAction(userId, lessonId, 'REDO', comment);
+    setReview((r) => r.filter(it => !(it.user.id===userId && it.lesson.id===lessonId)));
   };
 
-  // ответить на уточнение
   const answerQ = async (userId, lessonId, reply) => {
-    await teacherAPI.clarifyReply(userId, lessonId, reply);
-    setClarify((c) =>
-      c.map((x) =>
-        +x.user.id===+userId && +x.lesson.id===+lessonId
-          ? { ...x, status: 'IN_PROGRESS', meta: { reply } }
-          : x
-      )
-    );
+    await clarifyReply(userId, lessonId, reply);
+    setClarify((c) => c.filter(it => !(it.user.id===userId && it.lesson.id===lessonId)));
   };
 
   return (
@@ -44,3 +36,4 @@ export function TeacherProvider({ children }) {
   );
 }
 export const useTeacher = () => useContext(Ctx);
+

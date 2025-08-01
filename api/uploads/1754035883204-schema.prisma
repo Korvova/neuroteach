@@ -1,0 +1,296 @@
+/**
+ * ************************************************************
+ * Datasource & generator
+ * ************************************************************
+ */
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+/**
+ * ************************************************************
+ * ENUMS
+ * ************************************************************
+ */
+enum Role {
+  STUDENT
+  MODERATOR
+  TEACHER
+  CREATOR
+}
+
+enum LessonCheckType {
+  VIEW // просто «далее»
+  FILE // файл‑задание
+  TEST // связанный тест
+}
+
+enum LessonStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  ON_REVIEW
+  NEED_CLARIFY // студент задал вопрос
+  NEED_REWORK // учитель вернул на доработку
+  COMPLETED
+}
+
+enum TaskStatus {
+  WAIT
+  READY
+  NEED_CLARIFY
+  ON_CHECK
+  RETURNED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  CANCELED
+}
+
+/**
+ * ************************************************************
+ * USERS, GROUPS
+ * ************************************************************
+ */
+model User {
+  id        BigInt @id @default(autoincrement())
+  email     String @unique
+  password  String
+  firstName String
+  lastName  String
+  role      Role
+
+  // relations
+  groups        Membership[]
+  lessonStates  LessonProgress[]
+  tasks         Task[]
+  notifications Notification[]
+  payments      Payment[]        @relation("Buyer")
+
+  fileUploads FileSubmission[] @relation("StudentFiles")
+   lessonComments LessonComment[] @relation("UserToComments")
+
+  /**
+   * 🔹 учитель проверяет файлы
+   */
+  teacherChecks FileSubmission[] @relation("TeacherCheck")
+
+  createdAt DateTime @default(now())
+}
+
+/**
+ * связь многие‑ко‑многим User–Group + доп.поле (certificate)
+ */
+model Group {
+  id      BigInt       @id @default(autoincrement())
+  name    String
+  members Membership[]
+  // lessons   Lesson[]  // если будут групповые ограничения
+
+  createdAt DateTime @default(now())
+}
+
+model Membership {
+  userId      BigInt
+  groupId     BigInt
+  // необязательный сертификат, загружаемый модератором
+  certificate String?
+
+  user  User  @relation(fields: [userId], references: [id])
+  group Group @relation(fields: [groupId], references: [id])
+
+  @@id([userId, groupId])
+}
+
+/**
+ * ************************************************************
+ * КУРСЫ  →  УРОКИ  →  ТЕСТЫ
+ * ************************************************************
+ */
+model Course {
+  id          BigInt   @id @default(autoincrement())
+  title       String   @unique
+  // DraftJS raw‑JSON или Markdown → TEXT
+  description Json
+  price       Int? // ₽, nullable = бесплатный
+  lessons     Lesson[]
+
+  createdAt DateTime @default(now())
+}
+
+model Lesson {
+  id        BigInt          @id @default(autoincrement())
+  courseId  BigInt
+  order     Int // номер в курсе
+  title     String
+  content   Json // raw‑JSON
+  checkType LessonCheckType
+  testId    BigInt? // если checkType = TEST
+
+  submissions FileSubmission[] @relation("LessonFiles") // 🔹
+
+  // relations
+  course     Course           @relation(fields: [courseId], references: [id])
+  test       Test?            @relation(fields: [testId], references: [id])
+  progresses LessonProgress[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([courseId, order]) // один номер в рамках курса
+
+comments  LessonComment[] @relation("LessonToComments")
+
+
+}
+
+model Test {
+  id        BigInt     @id @default(autoincrement())
+  title     String
+  questions Question[]
+  lesson    Lesson[] // обратная связь
+
+  createdAt DateTime @default(now())
+}
+
+model Question {
+  id     BigInt @id @default(autoincrement())
+  testId BigInt
+  text   String
+  type   String // 'one' | 'many'  (можно Enum, если нужно)
+
+  answers Answer[]
+  test    Test     @relation(fields: [testId], references: [id])
+}
+
+model Answer {
+  id         BigInt  @id @default(autoincrement())
+  questionId BigInt
+  text       String
+  correct    Boolean @default(false)
+
+  question Question @relation(fields: [questionId], references: [id])
+}
+
+/**
+ * ************************************************************
+ * ПРОГРЕСС, ЗАДАНИЯ, ФАЙЛ‑САБМИШНЫ
+ * ************************************************************
+ */
+model LessonProgress {
+  userId   BigInt
+  lessonId BigInt
+  status   LessonStatus @default(NOT_STARTED)
+  // сохранённые ответы теста / комментарии и т.п.
+  meta     Json?
+
+  user   User   @relation(fields: [userId], references: [id])
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@id([userId, lessonId])
+}
+
+model Task {
+  id          BigInt           @id @default(autoincrement())
+  userId      BigInt
+  title       String
+  status      TaskStatus       @default(WAIT)
+  description Json?
+  files       FileSubmission[]
+
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model FileSubmission {
+  id BigInt @id @default(autoincrement())
+
+  /**
+   * 🔹 новое: к какому уроку / пользователю относится
+   */
+  lessonId  BigInt
+  studentId BigInt
+
+  taskId    BigInt?
+  filePath  String
+  comment   String?
+  teacherId BigInt?
+
+  lesson  Lesson @relation("LessonFiles", fields: [lessonId], references: [id])
+  student User   @relation("StudentFiles", fields: [studentId], references: [id])
+
+  task    Task? @relation(fields: [taskId], references: [id])
+  teacher User? @relation("TeacherCheck", fields: [teacherId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+/**
+ * ************************************************************
+ * УВЕДОМЛЕНИЯ
+ * ************************************************************
+ */
+model Notification {
+  id     BigInt  @id @default(autoincrement())
+  userId BigInt
+  title  String
+  body   String
+  read   Boolean @default(false)
+
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+
+
+
+/**
+ * ************************************************************
+ * Комментарии
+ * ************************************************************
+ */
+
+
+model LessonComment {
+  id         BigInt   @id @default(autoincrement())
+  lessonId   BigInt
+  authorId   BigInt
+  text       String
+  createdAt  DateTime @default(now())
+
+  lesson    Lesson   @relation("LessonToComments", fields: [lessonId], references: [id])
+  author    User     @relation("UserToComments",       fields: [authorId], references: [id])
+
+  @@index([lessonId])
+}
+
+
+
+
+
+
+
+
+/**
+ * ************************************************************
+ * ОПЛАТЫ / ДОСТУПЫ
+ * ************************************************************
+ */
+model Payment {
+  id       BigInt        @id @default(autoincrement())
+  buyerId  BigInt // Moderator (организация)
+  quantity Int
+  amount   Int // ₽
+  status   PaymentStatus @default(PENDING)
+
+  buyer     User     @relation("Buyer", fields: [buyerId], references: [id])
+  createdAt DateTime @default(now())
+}

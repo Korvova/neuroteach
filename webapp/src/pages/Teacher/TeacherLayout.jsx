@@ -7,6 +7,7 @@ export default function TeacherLayout() {
       <nav className={styles.nav}>
         <NavLink to="review"   className={({isActive})=>isActive?styles.active:''}>Ждут подтверждения</NavLink>
         <NavLink to="clarify"  className={({isActive})=>isActive?styles.active:''}>Ждут уточнения</NavLink>
+        
       </nav>
       <Outlet />
     </div>

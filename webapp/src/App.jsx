@@ -82,6 +82,8 @@ export default function App() {
         >
           <Route path="review"  element={<ReviewPage />} />
           <Route path="clarify" element={<ClarifyPage />} />
+
+          
         </Route>
       </Route>
 

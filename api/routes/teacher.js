@@ -8,18 +8,22 @@ const r = Router();
 
 // включаем в ответ и course.title, и filePath, и meta.question
 const baseSelect = {
-  user: { select: { id:true, firstName:true, lastName:true } },
+  user: { select: { id: true, firstName: true, lastName: true } },
   lesson: {
     select: {
-      id:true, title:true,
-      course: { select: { id:true, title:true } }
-    }
+      id: true,
+      title: true,
+      course: { select: { id: true, title: true } },
+    },
   },
   status: true,
   meta: true,
+  // убрали submission
 };
 
-// REVIEW
+
+
+
 r.get('/review', authMw(['TEACHER']), async (_req, res) => {
   const rows = await prisma.lessonProgress.findMany({
     where: { status: LessonStatus.ON_REVIEW },
@@ -27,6 +31,7 @@ r.get('/review', authMw(['TEACHER']), async (_req, res) => {
   });
   res.json(json(rows));
 });
+
 
 // отвечаем + сохраняем комментарий и опциональный файл
 r.patch('/review/:userId/:lessonId', authMw(['TEACHER']), async (req, res) => {
@@ -55,6 +60,35 @@ r.patch('/review/:userId/:lessonId', authMw(['TEACHER']), async (req, res) => {
 
   res.json({ ok:true });
 });
+
+
+
+
+
+
+
+
+r.get(
+  '/review/:userId/:lessonId/submission',
+  authMw(['TEACHER']),
+  async (req, res) => {
+    const userId   = +req.params.userId;
+    const lessonId = +req.params.lessonId;
+    const sub = await prisma.fileSubmission.findFirst({
+      where: { studentId: userId, lessonId },
+      orderBy: { createdAt: 'desc' },
+      select: { filePath: true, comment: true, createdAt: true }
+    });
+    res.json(json(sub)); // { filePath, comment, createdAt } или null
+  }
+);
+
+
+
+
+
+
+
 
 
 // GET /api/teacher/clarify — уроки, где status = NEED_CLARIFY
