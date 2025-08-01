@@ -100,7 +100,7 @@ export default function CreatorCoursesPage() {
 
       <Modal open={!!modalData} onClose={() => setModalData(null)}>
         {modalData && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: 400 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: 350 }}>
             <h3>{isEdit ? 'Редактировать курс' : 'Новый курс'}</h3>
 
             <input
