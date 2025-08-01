@@ -3,7 +3,7 @@ import { useCreator } from '../../context/CreatorContext';
 import Table from '../../components/Table/Table';
 import Modal from '../../components/Modal/Modal';
 import Button from '../../components/Button/Button';
-import RichEditor from '../../components/RichEditor';
+import RichEditor from '../../components/RichEditor'; 
 import { getCourse }   from '../../Services/courses';
 
 import {
@@ -38,7 +38,10 @@ export default function CreatorCoursesPage() {
     return plain.length > 40 ? plain.slice(0, 40) + '…' : plain;
   };
 
-  const rows = courses.map((c) => [
+  // Сортируем курсы по id в порядке возрастания
+  const sortedCourses = [...courses].sort((a, b) => a.id - b.id);
+
+  const rows = sortedCourses.map((c) => [
     c.id,
     c.title,
     preview(c.description || ''),

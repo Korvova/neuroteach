@@ -14,6 +14,47 @@ r.get('/', async (_req, res) => {
 
 
 
+// PUT /api/courses/:id — обновить курс по ID
+r.put('/:id', authMw(['CREATOR']), async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { title, description, price } = req.body;
+    const course = await prisma.course.update({
+      where: { id },
+      data: { title, description, price: price || null }
+    });
+    res.json(course);
+  } catch (e) {
+    console.error(e);
+    if (e.code === 'P2025') { // Prisma error: record not found
+      return res.status(404).json({ error: 'course_not_found' });
+    }
+    res.status(500).json({ error: 'course_update_failed' });
+  }
+});
+
+// DELETE /api/courses/:id — удалить курс по ID
+r.delete('/:id', authMw(['CREATOR']), async (req, res) => {
+  const id = Number(req.params.id);
+  try {
+    await prisma.course.delete({ where: { id } });
+    res.status(204).end();
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'course_delete_failed' });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
 
 /* детально + уроки + прогресс текущего пользователя */
 r.get('/:id', authMw(), async (req, res) => {
@@ -34,6 +75,7 @@ r.get('/:id', authMw(), async (req, res) => {
       }
     }
   });
+
 
 
   if (!course) return res.status(404).end();                     // ★

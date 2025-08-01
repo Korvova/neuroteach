@@ -5,8 +5,10 @@ import { useState, useEffect } from 'react';
 import { EditorState, convertFromRaw, convertToRaw } from 'draft-js';
 
 import Button from '../../components/Button/Button';
-import RichEditor from '../../components/RichEditor';
+
 import { createLesson, updateLesson, getLesson } from '../../Services/lessons';
+
+import RichDraftEditor from '../../components/RichDraftEditor'; 
 
 export default function LessonBuilderPage() {
   const { lessonId } = useParams();           // "new" или числовой id
@@ -126,11 +128,14 @@ export default function LessonBuilderPage() {
         />
       </div>
 
-      <RichEditor
+
+
+<RichDraftEditor
         editorState={editorState}
         onChange={setEditorState}
-        style={{ minHeight: 200, marginBottom: 12 }}
+        height={200}
       />
+
 
       <div style={{ margin: '12px 0' }}>
         <label>Тип проверки:&nbsp;</label>

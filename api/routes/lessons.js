@@ -99,26 +99,41 @@ r.post('/', authMw(['CREATOR']), async (req, res) => {
 
 
 
-// DELETE /api/lessons/:id — удалить урок (CREATOR)
+/** DELETE /api/lessons/:id — удалить урок и всё, что к нему привязано */
 r.delete('/:id', authMw(['CREATOR']), async (req, res) => {
   const id = +req.params.id;
   try {
-    // отвязываем прогрессы
-    await prisma.lessonProgress.deleteMany({ where: { lessonId: id } });
-    // (опционально) отвязываем сабмишны файлов, если нужно:
-    // await prisma.fileSubmission.deleteMany({ where: { lessonId: id } });
-    // удаляем сам урок
+    // 1) Удаляем все комментарии к уроку
+    await prisma.lessonComment.deleteMany({
+      where: { lessonId: id }
+    });
+
+    // 2) Удаляем все сабмишны файлов (и ответы преподавателя)
+    await prisma.fileSubmission.deleteMany({
+      where: { lessonId: id }
+    });
+
+    // 3) Удаляем записи прогресса
+    await prisma.lessonProgress.deleteMany({
+      where: { lessonId: id }
+    });
+
+    // 4) Тут, если нужно — отвязать тест от урока,
+    //    но обычно тесты мы не трогаем при удалении урока.
+
+    // 5) Удаляем сам урок
     await prisma.lesson.delete({ where: { id } });
+
     return res.status(204).end();
   } catch (err) {
     console.error('lesson.delete failed:', err);
     if (err.code === 'P2025') {
+      // не найден — вернём 404
       return res.status(404).json({ error: 'not_found' });
     }
     return res.status(500).json({ error: 'lesson_delete_failed' });
   }
 });
-
 
 
 
