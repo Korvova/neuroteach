@@ -65,16 +65,22 @@ model User {
   firstName String
   lastName  String
   role      Role
+
   // relations
   groups        Membership[]
   lessonStates  LessonProgress[]
   tasks         Task[]
   notifications Notification[]
   payments      Payment[]        @relation("Buyer")
-  fileUploads   FileSubmission[] @relation("StudentFiles")
-  lessonComments LessonComment[] @relation("UserToComments")
+
+  fileUploads FileSubmission[] @relation("StudentFiles")
+   lessonComments LessonComment[] @relation("UserToComments")
+
+  /**
+   * 🔹 учитель проверяет файлы
+   */
   teacherChecks FileSubmission[] @relation("TeacherCheck")
-  teacherResponses LessonComment[] @relation("TeacherResponse")
+
   createdAt DateTime @default(now())
 }
 
@@ -254,18 +260,21 @@ model Notification {
 
 
 model LessonComment {
-  id        BigInt   @id @default(autoincrement())
-  lessonId  BigInt
-  authorId  BigInt
-  text      String
-  createdAt DateTime @default(now())
-  answer    String?  // Поле для ответа преподавателя
-  teacherId BigInt?  // ID преподавателя
+  id         BigInt   @id @default(autoincrement())
+  lessonId   BigInt
+  authorId   BigInt
+  text       String
+  createdAt  DateTime @default(now())
+
   lesson    Lesson   @relation("LessonToComments", fields: [lessonId], references: [id])
-  author    User     @relation("UserToComments", fields: [authorId], references: [id])
-  teacher   User?    @relation("TeacherResponse", fields: [teacherId], references: [id])
+  author    User     @relation("UserToComments",       fields: [authorId], references: [id])
+
   @@index([lessonId])
 }
+
+
+
+
 
 
 

@@ -17,7 +17,7 @@ export default function LessonComments({ lessonId, onStatusChange }) {
       const data = await getLessonComments(lessonId);
       setComments(data);
     } catch (e) {
-      console.error(e);
+      console.error('Error loading comments:', e);
     }
   }
 
@@ -31,6 +31,7 @@ export default function LessonComments({ lessonId, onStatusChange }) {
       onStatusChange('NEED_CLARIFY');
     } catch (e) {
       alert('Не удалось отправить комментарий');
+      console.error('Error sending comment:', e);
     } finally {
       setSending(false);
     }
@@ -40,16 +41,34 @@ export default function LessonComments({ lessonId, onStatusChange }) {
     <div className={styles.container}>
       <h3>Вопросы и ответы</h3>
       <ul className={styles.list}>
-        {comments.map(c => (
-          <li key={c.id} className={styles.item}>
-            <b>{c.author.firstName} {c.author.lastName}</b>
-            <span className={styles.date}>
-              {new Date(c.createdAt).toLocaleString()}
-            </span>
-            <p>{c.text}</p>
-          </li>
-        ))}
+
+
+{comments.map(c => (
+  <li key={c.id} className={styles.item}>
+    <b>{c.author.firstName} {c.author.lastName}</b>
+    <span className={styles.date}>
+      {new Date(c.createdAt).toLocaleString()}
+    </span>
+    <p>{c.text}</p>
+
+    {c.answer && c.teacher && (
+      <div className={styles.answer}>
+        <b>
+          {c.teacher.firstName} {c.teacher.lastName} (Преподаватель)
+        </b>
+        <span className={styles.date}>
+          {new Date(c.createdAt).toLocaleString()}
+        </span>
+        <p>{c.answer}</p>
+      </div>
+    )}
+  </li>
+))}
+
       </ul>
+
+
+
       <div className={styles.form}>
         <textarea
           className={styles.textarea}

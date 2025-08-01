@@ -66,8 +66,27 @@
 
 /* цвета под каждый статус */
 .ON_REVIEW   { background:#ffe3a3; color:#7a5500; }
-.NEED_CLARIFY,
+.NEED_CLARIFY { background:#a3d0ff; color:hsl(64, 94%, 50%); }
 .NEED_REWORK { background:#a3d0ff; color:#003c7a; }
 .COMPLETED   { background:#b6f2c2; color:#0b5b1c; }
 /* зелёная заливка для COMPLETED */
 .done { background:#e8f9ed; }
+
+
+
+.feedback {
+  border: 1px solid var(--border);
+  padding: 12px;
+  margin: 16px 0;
+  background: #f9f9f9;
+}
+
+.feedbackItem {
+  margin-bottom: 12px;
+}
+
+.date {
+  color: #666;
+  font-size: 0.85rem;
+}
+

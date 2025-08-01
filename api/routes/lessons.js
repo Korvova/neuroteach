@@ -11,17 +11,27 @@ const r = Router();
 ────────────────────────────────────────────────── */
 r.get('/:id', authMw(), async (req, res) => {
   const lesson = await prisma.lesson.findUnique({
-    where  : { id: +req.params.id },
+    where: { id: +req.params.id },
     include: {
-      test: { include:{ questions:{ include:{ answers:true } } } },
-      progresses: {                     // только для текущего пользователя
-        where : { userId: req.user.id },
+      test: {
+        include: { questions:{ include:{ answers:true } } }
+      },
+      progresses: {
+        where: { userId: req.user.id },
         select: { status:true, meta:true }
+      },
+     submissions: {
+       where: { teacherId: { not: null } },   // только записи преподавателя
+       select: {
+         id:     true,
+         filePath: true,
+         comment:  true,
+         createdAt:true,
+         teacher: { select: { firstName:true, lastName:true } }
       }
     }
+    }
   });
-
-  // кладём первый (или null) в поле progress, чтоб фронту было проще
   lesson
     ? res.json({ ...lesson, progress: lesson.progresses[0] ?? null })
     : res.status(404).end();
@@ -49,10 +59,6 @@ r.put('/:id', authMw(['CREATOR']), async (req, res) => {
     res.status(404).end();
   }
 });
-
-
-
-
 
 
 

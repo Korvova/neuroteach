@@ -21,13 +21,32 @@ export default function LessonPage() {
   const [status, setStatus] = useState(null);
   const [sent, setSent] = useState(false);
   const [result, setResult] = useState(null);
+   const [fileUrl, setFileUrl] = useState('');  
+
+
+
+
 
   useEffect(() => {
     getLesson(lessonId).then((l) => {
       setLesson(l);
       setStatus(l.progresses?.[0]?.status ?? null);
+
+      // если уже есть загруженные файлы — покажем первый
+      const existing = l.submissions?.[0];
+      if (existing?.filePath) {
+        setFileUrl(existing.filePath);
+        setSent(true);
+      }
     });
+
+
+
+
   }, [lessonId]);
+
+
+
 
   if (!lesson) return null;
 
@@ -57,13 +76,44 @@ export default function LessonPage() {
   };
 
   /* ---------- FILE-урок: загрузка ---------- */
-  if (lesson.checkType === 'FILE') {
-    return (
-      <div className={styles.container}>
-        <StatusBadge />
-        <h2 className={styles.title}>{lesson.title}</h2>
-        {renderContent(lesson.content)}
-        <p>Скачайте задание, выполните и прикрепите файл.</p>
+/* ---------- FILE-урок: загрузка ---------- */
+if (lesson.checkType === 'FILE') {
+  return (
+    <div className={styles.container}>
+      <StatusBadge />
+      <h2 className={styles.title}>{lesson.title}</h2>
+
+      {renderContent(lesson.content)}
+
+      {/* ——— преподавательские отклики ——— */}
+      {lesson.submissions?.length > 0 && (
+        <div className={styles.feedback}>
+          <h3>Комментарий преподавателя</h3>
+          {lesson.submissions.map(sub => (
+            <div key={sub.id} className={styles.feedbackItem}>
+              <p>
+                <b>{sub.teacher.firstName} {sub.teacher.lastName}</b>{' '}
+                <span className={styles.date}>
+                  {new Date(sub.createdAt).toLocaleString()}
+                </span>
+              </p>
+              <p>{sub.comment}</p>
+              {sub.filePath && (
+                <a
+                  href={sub.filePath.startsWith('/') ? sub.filePath : '/' + sub.filePath}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download
+                >
+                  Скачать файл от преподавателя
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+<p>Скачайте задание, выполните и прикрепите файл.</p>
         <div className={styles.fileBlock}>
           <input type="file" onChange={(e) => setFile(e.target.files[0])} />
           <button
@@ -71,8 +121,9 @@ export default function LessonPage() {
             disabled={!file}
             onClick={async () => {
               try {
-                await uploadFile(lesson.id, file);
+                const { url } = await uploadFile(lesson.id, file);
                 setSent(true);
+                setFileUrl(url);                    // <-- запоминаем ссылку
                 setStatus('ON_REVIEW');
                 setLesson({ ...lesson, progress: { status: 'ON_REVIEW' } });
               } catch {
@@ -82,11 +133,27 @@ export default function LessonPage() {
           >
             {sent ? 'Отправлено ✔' : 'Отправить'}
           </button>
+
+          {fileUrl && (
+            <p style={{ marginTop: 8 }}>
+              Ваш файл:{' '}
+              <a
+                href={fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                download
+              >
+                Скачать
+              </a>
+            </p>
+          )}
+
           <LessonComments lessonId={lesson.id} onStatusChange={setStatus} />
         </div>
-      </div>
-    );
-  }
+    </div>
+  );
+}
+
 
   /* ---------- VIEW-урок ---------- */
   if (lesson.checkType === 'VIEW') {
