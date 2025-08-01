@@ -1,31 +1,41 @@
-import { createContext, useContext, useState } from 'react';
+// src/context/TeacherContext.jsx
+import { createContext, useContext, useEffect, useState } from 'react';
+import * as teacherAPI from '../Services/teacher';
 
-const Ctx = createContext(null);
-
-/* мок‑данные */
-const initReview = [
-  { id: 1, course: 'Вход в нейросети', lesson: 'Введение (файл)', user: 'Анна Иванова', file: 'report.pdf' },
-];
-const initClarify = [
-  { id: 10, course: 'Вход в нейросети', lesson: 'Демонстрация ChatGPT', user: 'Борис Кузнецов', q: 'Не открывается ссылка', status: 'ждёт уточнения' },
-];
+const Ctx = createContext();
 
 export function TeacherProvider({ children }) {
-  const [review, setReview] = useState(initReview);
-  const [clarify, setClarify] = useState(initClarify);
+  const [review,  setReview]  = useState([]);
+  const [clarify, setClarify] = useState([]);
 
-  const approve = (id) =>
-    setReview(review.filter((r) => r.id !== id));
+  // при монтировании подгружаем данные
+  useEffect(() => {
+    teacherAPI.getReview().then(setReview).catch(console.error);
+    teacherAPI.getClarify().then(setClarify).catch(console.error);
+  }, []);
 
-  const requestRedo = (id, comment) => {
-    setReview(review.filter((r) => r.id !== id));
-    alert(`Комментарий студенту: ${comment}`);
+  // подтвердить / вернуть на доработку
+  const approve = async (userId, lessonId) => {
+    await teacherAPI.reviewAction(userId, lessonId, 'READY');
+    setReview((r) => r.filter((x) => !(+x.user.id===+userId && +x.lesson.id===+lessonId)));
   };
 
-  const answerQ = (id, text) =>
-    setClarify(
-      clarify.map((c) => (c.id === id ? { ...c, status: 'отвечен', a: text } : c))
+  const requestRedo = async (userId, lessonId, comment) => {
+    await teacherAPI.reviewAction(userId, lessonId, 'RETURN', comment);
+    setReview((r) => r.filter((x) => !(+x.user.id===+userId && +x.lesson.id===+lessonId)));
+  };
+
+  // ответить на уточнение
+  const answerQ = async (userId, lessonId, reply) => {
+    await teacherAPI.clarifyReply(userId, lessonId, reply);
+    setClarify((c) =>
+      c.map((x) =>
+        +x.user.id===+userId && +x.lesson.id===+lessonId
+          ? { ...x, status: 'IN_PROGRESS', meta: { reply } }
+          : x
+      )
     );
+  };
 
   return (
     <Ctx.Provider value={{ review, clarify, approve, requestRedo, answerQ }}>
@@ -33,5 +43,4 @@ export function TeacherProvider({ children }) {
     </Ctx.Provider>
   );
 }
-
 export const useTeacher = () => useContext(Ctx);

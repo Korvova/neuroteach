@@ -57,3 +57,32 @@ Content-Type: application/json
 GET {{host}}/api/lessons
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkNSRUFUT1IiLCJpYXQiOjE3NTM5NTA3NTksImV4cCI6MTc1NDU1NTU1OX0.-CUuOp_Hslfynt_IgFDJF_pCew8fujYLgQXyK0OAFHE
 Content-Type: application/json
+
+
+
+
+
+
+### Получить токен учителя 
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "teacher@mail.com",    
+  "password": "secret"
+}
+
+токен: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwicm9sZSI6IlRFQUNIRVIiLCJpYXQiOjE3NTQwMzMzNjksImV4cCI6MTc1NDYzODE2OX0.ed-AFjJln1hnMg7QX4mjMGhP0XAcgLqf5ODzdtEn4lI"
+
+
+
+### получить уроки с уточнением
+GET {{host}}/api/teacher/clarify 
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwicm9sZSI6IlRFQUNIRVIiLCJpYXQiOjE3NTQwMzMzNjksImV4cCI6MTc1NDYzODE2OX0.ed-AFjJln1hnMg7QX4mjMGhP0XAcgLqf5ODzdtEn4lI
+Content-Type: application/json
+
+
+###  ревью
+GET {{host}}/api/teacher/review 
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwicm9sZSI6IlRFQUNIRVIiLCJpYXQiOjE3NTQwMzMzNjksImV4cCI6MTc1NDYzODE2OX0.ed-AFjJln1hnMg7QX4mjMGhP0XAcgLqf5ODzdtEn4lI
+Content-Type: application/json
